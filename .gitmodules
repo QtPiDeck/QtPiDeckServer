@@ -1,0 +1,3 @@
+[submodule "QtPiDeckCommon"]
+	path = QtPiDeckCommon
+	url = git@github.com:Mr1Penguin/QtPiDeckCommon.git

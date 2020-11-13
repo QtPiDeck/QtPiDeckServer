@@ -1,6 +1,6 @@
 QT += quick
 
-CONFIG += c++11
+CONFIG += c++17
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -21,3 +21,8 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+unix|win32: LIBS += -L$$OUT_PWD/../QtPiDeckCommon/ -lQtPiDeckCommon
+
+INCLUDEPATH += $$PWD/../QtPiDeckCommon
+DEPENDPATH += $$PWD/../QtPiDeckCommon
