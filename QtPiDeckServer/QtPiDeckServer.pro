@@ -28,7 +28,3 @@ else:unix: LIBS += -L$$OUT_PWD/../QtPiDeckCommon/ -lQtPiDeckCommon
 
 INCLUDEPATH += $$PWD/../QtPiDeckCommon
 DEPENDPATH += $$PWD/../QtPiDeckCommon
-
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QtPiDeckCommon/release/QtPiDeckCommon.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QtPiDeckCommon/debug/QtPiDeckCommon.lib
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../QtPiDeckCommon/libQtPiDeckCommon.a
