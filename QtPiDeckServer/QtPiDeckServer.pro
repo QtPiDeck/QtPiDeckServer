@@ -12,10 +12,12 @@ SOURCES += \
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH = $$PWD/../QtPiDeckCommon
+QML_IMPORT_PATH = $$PWD/../QtPiDeckCommon/qml/components
 
 # Additional import path used to resolve QML modules just for Qt Quick Designer
 QML_DESIGNER_IMPORT_PATH =
+
+INCLUDEPATH += include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -26,5 +28,5 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../QtPiDeckCommon/rele
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../QtPiDeckCommon/debug/ -lQtPiDeckCommon
 else:unix: LIBS += -L$$OUT_PWD/../QtPiDeckCommon/ -lQtPiDeckCommon
 
-INCLUDEPATH += $$PWD/../QtPiDeckCommon
+INCLUDEPATH += $$PWD/../QtPiDeckCommon/include
 DEPENDPATH += $$PWD/../QtPiDeckCommon
