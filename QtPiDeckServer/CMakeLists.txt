@@ -1,1 +1,2 @@
 add_subdirectory(QtPiDeckServer)
+add_subdirectory(QtPiDeckServerLib)
