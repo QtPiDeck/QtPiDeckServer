@@ -1,25 +1,16 @@
-# This is a basic workflow to help you get started with Actions
-
 name: qmake
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v1
@@ -28,6 +19,12 @@ jobs:
           key: ${{ runner.os }}-QtCache
 
       - uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule sync --recursive
+          git submodule update --init --force --recursive --depth=1
+      - uses: lukka/get-cmake@latest
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -35,20 +32,50 @@ jobs:
           modules: 'qtvirtualkeyboard'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
+      - name: Make build dir
+        run: mkdir build
+
+      - name: Run cmake
+        run: cmake .. -G Ninja
+        working-directory: build
+      - name: Build project
+        run: ninja
+        working-directory: build
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+
+      - uses: actions/checkout@v2
       - name: Checkout submodules
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule sync --recursive
           git submodule update --init --force --recursive --depth=1
+      - uses: lukka/get-cmake@latest
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.15.1'
+          modules: 'qtvirtualkeyboard'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
-      # Runs a single command using the runners shell
-      - name: Run qmake
-        run: |
-          mkdir build && cd build
-          qmake ..
+      - name: Make build dir
+        run: mkdir build
 
-      # Runs a set of commands using the runners shell
+      - name: Run cmake
+        run: cmake .. -G Ninja
+        working-directory: build
       - name: Build project
-        run: |
-          cd build
-          make -j3
+        run: ninja
+        working-directory: build
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
