@@ -9,5 +9,6 @@ public:
 
 protected:
     auto mainPage() -> QUrl final;
+    void appStartupPreparations() final;
 };
 }
