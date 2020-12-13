@@ -8,7 +8,6 @@ add_executable(QtPiDeckServer
 target_link_libraries(QtPiDeckServer
     PRIVATE
     Qt${QT_VERSION_MAJOR}::Quick
-    QtPiDeckCommon
     QtPiDeckServerLib)
 
 target_include_directories(QtPiDeckServer
