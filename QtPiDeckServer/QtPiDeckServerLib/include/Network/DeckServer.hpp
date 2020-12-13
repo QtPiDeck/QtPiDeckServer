@@ -12,11 +12,11 @@ enum DeckMessages : uint64_t {
 };
 
 class DeckServer : public QObject {
-    Q_OBJECT
+    Q_OBJECT // NOLINT
 public:
     explicit DeckServer(QObject *parent = nullptr);
 
-public slots:
+public slots: // NOLINT(readability-redundant-access-specifiers)
     void handleConnection();
     void readData();
 
@@ -24,8 +24,8 @@ private:
     void connectToServerSignal();
     void sendPong();
 
-    QTcpServer *m_server;
-    QTcpSocket *m_socket;
+    QTcpServer *m_server{};
+    QTcpSocket *m_socket{};
     QMetaObject::Connection m_serverConnection;
 };
 }

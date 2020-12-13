@@ -14,14 +14,14 @@ auto wrap(T* context, void(T::* function)()) {
 }
 
 DeckServer::DeckServer(QObject *parent) : QObject(parent) {
-    m_server = new QTcpServer(this);
+    m_server = new QTcpServer(this); // NOLINT(cppcoreguidelines-owning-memory)
     connectToServerSignal();
 
     Application::current()->ioc().resolveService<Services::IMessageBus>()->subscribe(this, wrap(this, &DeckServer::sendPong), DeckMessages::PingReceived);
 
+    constexpr qint16 defaultPort = 13000;
     // move to separate function
-    if(!m_server->listen(QHostAddress::LocalHost, 13000)) {
-        qFatal("Failed to start a server");
+    if(!m_server->listen(QHostAddress::LocalHost, defaultPort)) {
     }
 }
 
@@ -62,7 +62,7 @@ void DeckServer::readData() {
     qds.setByteOrder(QDataStream::BigEndian);
     qds.setVersion(QDataStream::Qt_5_15);
 
-    QtPiDeck::Network::MessageHeader header;
+    QtPiDeck::Network::MessageHeader header{};
 
     qds.startTransaction();
     qds >> header;

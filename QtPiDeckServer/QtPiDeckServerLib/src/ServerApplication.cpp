@@ -3,8 +3,7 @@
 #include "Services/MessageBus.hpp"
 
 namespace QtPiDeck::Server {
-ServerApplication::ServerApplication() : QtPiDeck::Application() {
-}
+ServerApplication::ServerApplication() = default;
 
 auto ServerApplication::mainPage() -> QUrl {
     return QUrl{QStringLiteral("qrc:/qml/pages/main.qml")};

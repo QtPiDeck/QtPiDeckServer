@@ -3,7 +3,7 @@
 
 #include "ServerApplication.hpp"
 
-int main(int argc, char *argv[])
+auto main(int argc, char *argv[]) -> int
 {
     QtPiDeck::Server::ServerApplication app;
     return app.start(argc, argv);
