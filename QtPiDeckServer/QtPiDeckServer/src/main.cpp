@@ -1,9 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "tmp_init.hpp"
+#include "ServerApplication.hpp"
 
 int main(int argc, char *argv[])
 {
-    return tmp_init(argc, argv);
+    QtPiDeck::Server::ServerApplication app;
+    return app.start(argc, argv);
 }
