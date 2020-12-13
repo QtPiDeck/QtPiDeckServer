@@ -14,4 +14,11 @@ void ServerApplication::appStartupPreparations() {
 
     ioc().registerSingleton(std::make_shared<Services::MessageBus>(nullptr));
 }
+
+void ServerApplication::setupEngine(QQmlApplicationEngine & engine) {
+    // during early testing(server and client in app) communication was broken
+    // starting server this way fixes a problem
+    // might need additional testing when client side app is ready to connect
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &m_deckServer, &Network::DeckServer::start);
+}
 }

@@ -15,4 +15,5 @@ target_link_libraries(QtPiDeckServerLib
     PUBLIC
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::Network
-    QtPiDeckCommon)
+    QtPiDeckCommon
+    PRIVATE)

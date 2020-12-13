@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <QObject>
 #include <QTcpServer>
 
@@ -16,6 +18,8 @@ class DeckServer : public QObject {
 public:
     explicit DeckServer(QObject *parent = nullptr);
 
+    void start();
+
 public slots: // NOLINT(readability-redundant-access-specifiers)
     void handleConnection();
     void readData();
@@ -24,8 +28,8 @@ private:
     void connectToServerSignal();
     void sendPong();
 
-    QTcpServer *m_server{};
+    QTcpServer m_server;
     QTcpSocket *m_socket{};
-    QMetaObject::Connection m_serverConnection;
+    std::optional<QMetaObject::Connection> m_serverConnection;
 };
 }
