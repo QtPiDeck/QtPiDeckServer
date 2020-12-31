@@ -1,0 +1,63 @@
+name: Run tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        qt: [5.15.2]
+        gcc: [8, 10]
+        experimental: [false]
+        include:
+          - qt: 6.0.0
+            gcc: 10
+            experimental: true
+
+    name: Qt${{ matrix.qt }} - gcc-${{ matrix.gcc }}
+    continue-on-error: ${{ matrix.experimental }}
+
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt }}
+
+      - uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule sync --recursive
+          git submodule update --init --force --recursive --depth=1
+      - uses: lukka/get-cmake@latest
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '${{ matrix.qt }}'
+          modules: 'qtvirtualkeyboard'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: Make build dir
+        run: mkdir build
+
+      - name: Run cmake
+        run: cmake .. -G Ninja
+        working-directory: build
+        env:
+          CC: gcc-${{ matrix.gcc }}
+          CXX: g++-${{ matrix.gcc }}
+      - name: Build project
+        run: ninja
+        working-directory: build
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LD_LIBRARY_PATH: ./QtPiDeckCommon

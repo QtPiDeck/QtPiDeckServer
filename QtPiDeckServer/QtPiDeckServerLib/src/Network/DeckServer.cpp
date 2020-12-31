@@ -43,6 +43,7 @@ void DeckServer::sendPong() {
 }
 
 void DeckServer::handleConnection() {
+    qDebug() << "New client";
     // only one connection at the same time
     disconnect(*m_serverConnection);
     m_serverConnection.reset();
@@ -55,6 +56,7 @@ namespace {
 void processMessage(QtPiDeck::Network::MessageHeader & header) {
     switch (header.messageId) {
     case QtPiDeck::Network::MessageId::Ping:
+        qDebug() << "Got ping";
         Application::current()->ioc().resolveService<Services::IMessageBus>()->sendMessage(Bus::Message{DeckMessages::PingReceived});
         break;
     default:
