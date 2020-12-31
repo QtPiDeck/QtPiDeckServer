@@ -53,6 +53,9 @@ jobs:
       - name: Make build dir
         run: mkdir build
 
+        uses: ilammy/msvc-dev-cmd@v1
+        if: matrix.cfg.os == 'windows-latest'
+
       - name: Run cmake
         run: cmake .. -G Ninja
         working-directory: build
