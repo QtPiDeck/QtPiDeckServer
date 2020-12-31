@@ -15,6 +15,8 @@ jobs:
         - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false }
         - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false }
         - { os: ubuntu-20.04, qt: 6.0.0, cc: gcc-10, cxx: g++-10, experimental: true }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false }
+        - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true }
         #os: [ubuntu-20.04, windows-latest, macos-latest]
         #qt: [5.15.2]
         #gcc: [8, 10]
