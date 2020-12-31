@@ -10,8 +10,9 @@ public:
 
 protected:
     auto mainPage() -> QUrl final;
-    void appStartupPreparations() final;
-    void setupEngine(QQmlApplicationEngine & engine) final;
+    void initialPreparations() final;
+    void appCreated() final;
+    void engineCreated(QQmlApplicationEngine & engine) final;
 
 private:
     Network::DeckServer m_deckServer;
