@@ -8,19 +8,22 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.cfg.os }}
     strategy:
       matrix:
-        qt: [5.15.2]
-        gcc: [8, 10]
-        experimental: [false]
-        include:
-          - qt: 6.0.0
-            gcc: 10
-            experimental: true
+        cfg:
+        - { os: ubuntu-latest, qt: 5.15.2, cc:gcc-8, cxx:g++-8, experimental: false }
+        #os: [ubuntu-20.04, windows-latest, macos-latest]
+        #qt: [5.15.2]
+        #gcc: [8, 10]
+        #experimental: [false]
+        #include:
+        #  - qt: 6.0.0
+        #    gcc: 10
+        #    experimental: true
 
-    name: Qt${{ matrix.qt }} - gcc-${{ matrix.gcc }}
-    continue-on-error: ${{ matrix.experimental }}
+    name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
+    continue-on-error: ${{ matrix.cfg.experimental }}
 
     steps:
       - name: Cache Qt
@@ -28,7 +31,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt }}
+          key: ${{ runner.cfg.os }}-QtCache-${{ matrix.cfg.qt }}
 
       - uses: actions/checkout@v2
       - name: Checkout submodules
@@ -40,8 +43,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '${{ matrix.qt }}'
-          modules: 'qtvirtualkeyboard'
+          version: '${{ matrix.cfg.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: Make build dir
@@ -51,8 +53,8 @@ jobs:
         run: cmake .. -G Ninja
         working-directory: build
         env:
-          CC: gcc-${{ matrix.gcc }}
-          CXX: g++-${{ matrix.gcc }}
+          CC: ${{ matrix.cfg.cc }}
+          CXX: ${{ matrix.cfg.cxx }}
       - name: Build project
         run: ninja
         working-directory: build
@@ -61,3 +63,4 @@ jobs:
         working-directory: build
         env:
           LD_LIBRARY_PATH: ./QtPiDeckCommon
+        if: matrix.cfg.os != 'windows-latest'
