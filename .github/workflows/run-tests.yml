@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.cfg.os }}-QtCache-${{ matrix.cfg.qt }}
+          key: ${{ runner.os }}-QtCache-${{ matrix.cfg.qt }}
 
       - uses: actions/checkout@v2
       - name: Checkout submodules
