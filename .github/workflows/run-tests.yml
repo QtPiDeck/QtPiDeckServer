@@ -71,3 +71,9 @@ jobs:
         env:
           LD_LIBRARY_PATH: ./QtPiDeckCommon
         if: matrix.cfg.os != 'windows-latest'
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        #env:
+          #PATH: ./QtPiDeckCommon
+        if: matrix.cfg.os == 'windows-latest'
