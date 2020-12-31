@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-latest, qt: 5.15.2, cc:gcc-8, cxx:g++-8, experimental: false }
+        - { os: ubuntu-latest, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false }
         #os: [ubuntu-20.04, windows-latest, macos-latest]
         #qt: [5.15.2]
         #gcc: [8, 10]
