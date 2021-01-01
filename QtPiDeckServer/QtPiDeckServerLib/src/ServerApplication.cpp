@@ -4,7 +4,7 @@
 
 #include "Services/MessageBus.hpp"
 
-namespace QtPiDeck::Server {
+namespace QtPiDeck {
 ServerApplication::ServerApplication() = default;
 
 auto ServerApplication::mainPage() -> QUrl {

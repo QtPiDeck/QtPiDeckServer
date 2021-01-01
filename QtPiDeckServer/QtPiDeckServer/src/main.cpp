@@ -5,6 +5,6 @@
 
 auto main(int argc, char *argv[]) -> int
 {
-    QtPiDeck::Server::ServerApplication app;
+    QtPiDeck::ServerApplication app;
     return app.start(argc, argv);
 }

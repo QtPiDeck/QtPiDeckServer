@@ -7,7 +7,7 @@
 
 #include "Application.hpp"
 
-namespace QtPiDeck::Server::Network {
+namespace QtPiDeck::Network {
 
 enum DeckMessages : uint64_t {
     PingReceived = 0x100
