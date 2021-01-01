@@ -22,14 +22,6 @@ jobs:
         - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true }
         - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false }
         - { os: macos-latest, qt: 6.0.0, cc: clang, cxx: clang++, experimental: true }
-        #os: [ubuntu-20.04, windows-latest, macos-latest]
-        #qt: [5.15.2]
-        #gcc: [8, 10]
-        #experimental: [false]
-        #include:
-        #  - qt: 6.0.0
-        #    gcc: 10
-        #    experimental: true
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -43,12 +35,15 @@ jobs:
           key: ${{ runner.os }}-QtCache-${{ matrix.cfg.qt }}
 
       - uses: actions/checkout@v2
+
       - name: Checkout submodules
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule sync --recursive
           git submodule update --init --force --recursive --depth=1
+
       - uses: lukka/get-cmake@latest
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -95,12 +90,16 @@ jobs:
         env:
           CC: ${{ matrix.cfg.cc }}
           CXX: ${{ matrix.cfg.cxx }}
+
       - name: Build project
         run: ninja
         working-directory: build
-      - run: Get-Location | % { echo "$_\QtPiDeckCommon\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Set path to QtPiDeckCommon library(windows)
+        run: Get-Location | % { echo "$_\QtPiDeckCommon\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         working-directory: build
         if: matrix.cfg.os == 'windows-latest'
+
       - name: Test project
         run: ctest --output-on-failure
         working-directory: build
