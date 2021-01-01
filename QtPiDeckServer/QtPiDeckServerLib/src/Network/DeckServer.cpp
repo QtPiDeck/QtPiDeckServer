@@ -36,13 +36,14 @@ void DeckServer::sendPong() {
     QByteArray qba;
     QDataStream out{&qba, QIODevice::WriteOnly};
     out.setByteOrder(QDataStream::BigEndian);
-    out.setVersion(QDataStream::Qt_5_15);
+    out.setVersion(QDataStream::Qt_5_11);
     out << response;
     m_socket->write(qba);
     m_socket->flush();
 }
 
 void DeckServer::handleConnection() {
+    qDebug() << "New client";
     // only one connection at the same time
     disconnect(*m_serverConnection);
     m_serverConnection.reset();
@@ -55,6 +56,7 @@ namespace {
 void processMessage(QtPiDeck::Network::MessageHeader & header) {
     switch (header.messageId) {
     case QtPiDeck::Network::MessageId::Ping:
+        qDebug() << "Got ping";
         Application::current()->ioc().resolveService<Services::IMessageBus>()->sendMessage(Bus::Message{DeckMessages::PingReceived});
         break;
     default:
@@ -67,7 +69,7 @@ void processMessage(QtPiDeck::Network::MessageHeader & header) {
 void DeckServer::readData() {
     QDataStream qds(m_socket);
     qds.setByteOrder(QDataStream::BigEndian);
-    qds.setVersion(QDataStream::Qt_5_15);
+    qds.setVersion(QDataStream::Qt_5_11);
 
     QtPiDeck::Network::MessageHeader header{};
 
