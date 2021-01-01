@@ -6,7 +6,8 @@ add_library(QtPiDeckServerLib STATIC
   include/ServerApplication.hpp
   src/Network/DeckServer.cpp
   include/Network/DeckServer.hpp
-)
+  qml.qrc
+  )
 
 target_include_directories(QtPiDeckServerLib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

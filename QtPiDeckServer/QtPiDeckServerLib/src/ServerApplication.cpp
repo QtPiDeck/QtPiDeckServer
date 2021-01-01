@@ -4,6 +4,10 @@
 
 #include "Services/MessageBus.hpp"
 
+static void initStaticResouces() {
+    Q_INIT_RESOURCE(qml); // NOLINT
+}
+
 namespace QtPiDeck {
 ServerApplication::ServerApplication() = default;
 
@@ -22,13 +26,15 @@ void ServerApplication::initialPreparations() {
 }
 
 void ServerApplication::appCreated() {
-
+    initStaticResouces();
 }
 
 void ServerApplication::engineCreated(QQmlApplicationEngine & engine) {
     // during early testing(server and client in app) communication was broken
     // starting server this way fixes a problem
     // might need additional testing when client side app is ready to connect
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &m_deckServer, &Network::DeckServer::start);
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &m_deckServer, &Network::DeckServer::start); // clazy:exclude=connect-non-signal
+
+    engine.addImportPath("qrc:/qml/components");
 }
 }
