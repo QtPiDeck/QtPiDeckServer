@@ -56,7 +56,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
         if: matrix.cfg.os == 'windows-latest'
 
-      - run: sudo apt install libx11-dev -y # libxcb-util0-dev libxcb-image0-dev -y # enable caching
+      - run: sudo apt install libxcb-xkb-dev -y # libxcb-util0-dev libxcb-image0-dev -y # enable caching
         if: matrix.cfg.os == 'ubuntu-20.04' && matrix.cfg.qt == '6.0.0'
 
       - name: Run cmake
