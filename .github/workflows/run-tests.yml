@@ -69,11 +69,11 @@ jobs:
         run: ctest --output-on-failure
         working-directory: build
         env:
-          LD_LIBRARY_PATH: ./QtPiDeckCommon
+          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
         if: matrix.cfg.os != 'windows-latest'
-      - run: Get-Location | % { echo "$_.\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - run: Get-Location | % { echo "$_\QtPiDeckCommon\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         if: matrix.cfg.os == 'windows-latest'
-      - name: Test project
+      - name: Test project(Windows)
         run: ctest --output-on-failure
         working-directory: build
         if: matrix.cfg.os == 'windows-latest'
