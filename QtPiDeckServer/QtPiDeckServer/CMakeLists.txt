@@ -2,8 +2,7 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick REQUIRED)
 
 add_executable(QtPiDeckServer
-    src/main.cpp
-    qml.qrc)
+    src/main.cpp)
 
 target_link_libraries(QtPiDeckServer
     PRIVATE

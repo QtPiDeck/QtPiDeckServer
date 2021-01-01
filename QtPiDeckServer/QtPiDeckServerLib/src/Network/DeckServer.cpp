@@ -9,22 +9,12 @@
 #include "Network/DeckDataStream.hpp"
 
 namespace QtPiDeck::Network {
-
-// TODO:
-// better name
-// add overload with const Bus::Message& arg passed
-// move to separate file
-template<class T>
-auto wrap(T* context, void(T::* function)()) {
-    return [context, function](const Bus::Message& /*message*/) {(context->*function)();};
-}
-
 DeckServer::DeckServer(QObject *parent) : QObject(parent) {
 }
 
 void DeckServer::start() {
     connectToServerSignal();
-    Application::current()->ioc().resolveService<Services::IMessageBus>()->subscribe(this, wrap(this, &DeckServer::sendPong), DeckMessages::PingReceived);
+    Services::subscribe(*Application::current()->ioc().resolveService<Services::IMessageBus>(), this, &DeckServer::sendPong, DeckMessages::PingReceived);
     // default port and address will be in global config
     constexpr qint16 defaultPort = 13000;
     if(!m_server.listen(QHostAddress::LocalHost, defaultPort)) {
@@ -33,10 +23,15 @@ void DeckServer::start() {
 }
 
 void DeckServer::sendPong() {
-    const QtPiDeck::Network::MessageHeader response{0, QtPiDeck::Network::MessageId::Pong};
-    QByteArray qba;
-    DeckDataStream outStream{&qba, QIODevice::WriteOnly};
-    outStream << response;
+    const QByteArray qba = [] {
+        const QtPiDeck::Network::MessageHeader response{0, QtPiDeck::Network::MessageId::Pong};
+        QByteArray tmp;
+        tmp.reserve(sizeof(MessageHeader));
+        DeckDataStream outStream{&tmp, QIODevice::WriteOnly};
+        outStream << response;
+        return tmp;
+    }();
+
     m_socket->write(qba);
     m_socket->flush();
 }
@@ -65,7 +60,7 @@ void processMessage(const QtPiDeck::Network::MessageHeader & header) {
 }
 
 template<class T>
-std::optional<T> readObject(QTcpSocket * socket) {
+auto readObject(QTcpSocket * socket) -> std::optional<T> {
     DeckDataStream inStream{socket};
     T object{};
 
