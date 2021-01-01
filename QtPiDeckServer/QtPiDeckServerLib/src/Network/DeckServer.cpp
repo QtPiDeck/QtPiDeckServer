@@ -1,13 +1,14 @@
 #include "Network/DeckServer.hpp"
 
 #include <QTcpSocket>
-#include <QDataStream>
+
 
 #include "Application.hpp"
 #include "Services/IMessageBus.hpp"
 #include "Network/MessageHeader.hpp"
+#include "Network/DeckDataStream.hpp"
 
-namespace QtPiDeck::Server::Network {
+namespace QtPiDeck::Network {
 
 // TODO:
 // better name
@@ -32,12 +33,10 @@ void DeckServer::start() {
 }
 
 void DeckServer::sendPong() {
-    QtPiDeck::Network::MessageHeader response{0, QtPiDeck::Network::MessageId::Pong};
+    const QtPiDeck::Network::MessageHeader response{0, QtPiDeck::Network::MessageId::Pong};
     QByteArray qba;
-    QDataStream out{&qba, QIODevice::WriteOnly};
-    out.setByteOrder(QDataStream::BigEndian);
-    out.setVersion(QDataStream::Qt_5_11);
-    out << response;
+    DeckDataStream outStream{&qba, QIODevice::WriteOnly};
+    outStream << response;
     m_socket->write(qba);
     m_socket->flush();
 }
@@ -53,7 +52,7 @@ void DeckServer::handleConnection() {
 }
 
 namespace {
-void processMessage(QtPiDeck::Network::MessageHeader & header) {
+void processMessage(const QtPiDeck::Network::MessageHeader & header) {
     switch (header.messageId) {
     case QtPiDeck::Network::MessageId::Ping:
         qDebug() << "Got ping";
@@ -64,23 +63,28 @@ void processMessage(QtPiDeck::Network::MessageHeader & header) {
         break;
     }
 }
+
+template<class T>
+std::optional<T> readObject(QTcpSocket * socket) {
+    DeckDataStream inStream{socket};
+    T object{};
+
+    inStream.startTransaction();
+    inStream >> object;
+    if (inStream.commitTransaction()) {
+        return object;
+    }
+
+    return std::nullopt;
+}
 }
 
 void DeckServer::readData() {
-    QDataStream qds(m_socket);
-    qds.setByteOrder(QDataStream::BigEndian);
-    qds.setVersion(QDataStream::Qt_5_11);
+    const auto header = readObject<QtPiDeck::Network::MessageHeader>(m_socket);
 
-    QtPiDeck::Network::MessageHeader header{};
-
-    qds.startTransaction();
-    qds >> header;
-
-    if (!qds.commitTransaction()) {
-        return;
+    if (header) {
+        processMessage(*header);
     }
-
-    processMessage(header);
 }
 
 void DeckServer::connectToServerSignal() {
