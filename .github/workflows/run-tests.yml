@@ -71,9 +71,9 @@ jobs:
         env:
           LD_LIBRARY_PATH: ./QtPiDeckCommon
         if: matrix.cfg.os != 'windows-latest'
+      - run: Get-Location | % { echo "$_.\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if: matrix.cfg.os == 'windows-latest'
       - name: Test project
         run: ctest --output-on-failure
         working-directory: build
-        #env:
-          #PATH: ./QtPiDeckCommon
         if: matrix.cfg.os == 'windows-latest'
