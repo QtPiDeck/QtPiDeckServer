@@ -20,19 +20,23 @@ void DeckServer::start() {
     if(!m_server.listen(QHostAddress::LocalHost, defaultPort)) {
         qWarning() << "Failed to start DeckServer";
     }
+
+    qDebug() << "Server started";
+}
+
+namespace {
+template<class T>
+void writeObject(const T& object, QTcpSocket * socket) {
+    QByteArray tmp;
+    tmp.reserve(sizeof(T));
+    DeckDataStream outStream{&tmp, QIODevice::WriteOnly};
+    outStream << object;
+    socket->write(tmp);
+}
 }
 
 void DeckServer::sendPong() {
-    const QByteArray qba = [] {
-        const QtPiDeck::Network::MessageHeader response{0, QtPiDeck::Network::MessageId::Pong};
-        QByteArray tmp;
-        tmp.reserve(sizeof(MessageHeader));
-        DeckDataStream outStream{&tmp, QIODevice::WriteOnly};
-        outStream << response;
-        return tmp;
-    }();
-
-    m_socket->write(qba);
+    writeObject(MessageHeader{0, MessageId::Pong}, m_socket);
     m_socket->flush();
 }
 
