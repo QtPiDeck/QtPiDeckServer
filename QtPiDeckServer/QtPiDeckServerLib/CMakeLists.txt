@@ -3,9 +3,12 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick Network REQUIRED)
 
 add_library(QtPiDeckServerLib STATIC
   src/ServerApplication.cpp
-  include/ServerApplication.hpp
   src/Network/DeckServer.cpp
+  src/Services/SettingsStorage.cpp
+  include/ServerApplication.hpp
   include/Network/DeckServer.hpp
+  include/Services/IServerSettingsStorage.hpp
+  include/Services/SettingsStorage.hpp
   qml.qrc
   )
 
