@@ -5,10 +5,12 @@ add_library(QtPiDeckServerLib STATIC
   src/ServerApplication.cpp
   src/Network/DeckServer.cpp
   src/Services/SettingsStorage.cpp
+  src/ViewModels/SettingsViewModel.cpp
   include/ServerApplication.hpp
   include/Network/DeckServer.hpp
   include/Services/IServerSettingsStorage.hpp
   include/Services/SettingsStorage.hpp
+  include/ViewModels/SettingsViewModel.hpp
   qml.qrc
   )
 

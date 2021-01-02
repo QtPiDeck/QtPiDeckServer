@@ -3,6 +3,8 @@
 #include <QCoreApplication>
 
 #include "Services/MessageBus.hpp"
+#include "Services/SettingsStorage.hpp"
+#include "ViewModels/SettingsViewModel.hpp"
 
 static void initStaticResouces() {
     Q_INIT_RESOURCE(qml); // NOLINT
@@ -19,6 +21,7 @@ void ServerApplication::initialPreparations() {
     Application::initialPreparations();
 
     ioc().registerSingleton(std::make_shared<Services::MessageBus>(nullptr));
+    ioc().registerService<Services::IServerSettingsStorage, Services::SettingsStorage>();
 
 #if QT_VERSION_MAJOR < 6
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -36,5 +39,7 @@ void ServerApplication::engineCreated(QQmlApplicationEngine & engine) {
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &m_deckServer, &Network::DeckServer::start); // clazy:exclude=connect-non-signal
 
     engine.addImportPath("qrc:/qml/components");
+
+    ViewModels::SettingsViewModel::registerType();
 }
 }
