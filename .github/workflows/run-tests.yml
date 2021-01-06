@@ -85,7 +85,7 @@ jobs:
         if: matrix.cfg.os == 'windows-latest' && matrix.cfg.qt == '6.0.0'
 
       - name: Run cmake
-        run: cmake .. -G Ninja
+        run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF
         working-directory: build
         env:
           CC: ${{ matrix.cfg.cc }}
