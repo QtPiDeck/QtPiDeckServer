@@ -28,11 +28,6 @@ class SettingsViewModel : public QObject, public Services::UseServices<Services:
                NOTIFY obsWebsocketAddressChanged)
     Q_PROPERTY(QString obsWebsocketPort READ obsWebsocketPort WRITE setObsWebsocketPort NOTIFY obsWebsocketPortChanged)
 #endif
-
-    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort, &deckServerAddressChanged)
-    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerAddress, &deckServerPortChanged)
-    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketAddress, &obsWebsocketAddressChanged)
-    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketPort, &obsWebsocketPortChanged)
 public:
     explicit SettingsViewModel(QObject* parent = nullptr) noexcept;
     SettingsViewModel(QObject* parent, std::shared_ptr<Services::IServerSettingsStorage> settingsStorage) noexcept;
@@ -60,5 +55,15 @@ signals:
     void deckServerPortChanged();
     void obsWebsocketAddressChanged();
     void obsWebsocketPortChanged();
+
+private:
+    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString,
+                               m_deckServerPort, &SettingsViewModel::deckServerAddressChanged)
+    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString,
+                               m_deckServerAddress, &SettingsViewModel::deckServerPortChanged)
+    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString,
+                               m_obsWebsocketAddress, &SettingsViewModel::obsWebsocketAddressChanged)
+    Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString,
+                               m_obsWebsocketPort, &SettingsViewModel::obsWebsocketPortChanged)
 };
 }
