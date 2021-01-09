@@ -23,3 +23,6 @@ target_link_libraries(QtPiDeckServerLib
     Qt${QT_VERSION_MAJOR}::Network
     QtPiDeckCommon
     PRIVATE)
+
+get_target_property(QtPiDeckCommon_SOURCE_DIR QtPiDeckCommon SOURCE_DIR)
+set(QML_IMPORT_PATH ${QtPiDeckCommon_SOURCE_DIR}/qml/components CACHE STRING "Qt Creator qml import paths" FORCE)
