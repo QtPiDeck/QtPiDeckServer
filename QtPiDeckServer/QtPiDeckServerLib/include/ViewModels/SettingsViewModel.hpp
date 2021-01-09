@@ -11,28 +11,24 @@
 namespace QtPiDeck::ViewModels {
 class SettingsViewModel : public QObject, public Services::UseServices<Services::IServerSettingsStorage> {
     Q_OBJECT // NOLINT
+#if QT_VERSION_MAJOR == 6
     Q_PROPERTY(QString deckServerAddress READ deckServerAddress WRITE setDeckServerAddress
-               NOTIFY deckServerAddressChanged
-#if QT_VERSION_MAJOR == 6
-               BINDABLE bindableDeckServerAddress
-#endif
-               )
+               NOTIFY deckServerAddressChanged BINDABLE bindableDeckServerAddress)
     Q_PROPERTY(QString deckServerPort READ deckServerPort WRITE setDeckServerPort NOTIFY deckServerPortChanged
-#if QT_VERSION_MAJOR == 6
-               BINDABLE bindableDeckServerPort
-#endif
-               )
+               BINDABLE bindableDeckServerPort)
     Q_PROPERTY(QString obsWebsocketAddress READ obsWebsocketAddress WRITE setObsWebsocketAddress
-               NOTIFY obsWebsocketAddressChanged
-#if QT_VERSION_MAJOR == 6
-               BINDABLE bindableObsWebsocketAddress
-#endif
-               )
+               NOTIFY obsWebsocketAddressChanged BINDABLE bindableObsWebsocketAddress)
     Q_PROPERTY(QString obsWebsocketPort READ obsWebsocketPort WRITE setObsWebsocketPort NOTIFY obsWebsocketPortChanged
-#if QT_VERSION_MAJOR == 6
-               BINDABLE bindableObsWebsocketPort
+               BINDABLE bindableObsWebsocketPort)
+#else
+    Q_PROPERTY(QString deckServerAddress READ deckServerAddress WRITE setDeckServerAddress
+               NOTIFY deckServerAddressChanged)
+    Q_PROPERTY(QString deckServerPort READ deckServerPort WRITE setDeckServerPort NOTIFY deckServerPortChanged)
+    Q_PROPERTY(QString obsWebsocketAddress READ obsWebsocketAddress WRITE setObsWebsocketAddress
+               NOTIFY obsWebsocketAddressChanged)
+    Q_PROPERTY(QString obsWebsocketPort READ obsWebsocketPort WRITE setObsWebsocketPort NOTIFY obsWebsocketPortChanged)
 #endif
-               )
+
     Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort)
     Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerAddress)
     Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketAddress)
