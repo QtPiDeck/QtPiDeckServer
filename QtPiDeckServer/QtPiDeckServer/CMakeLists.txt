@@ -11,6 +11,3 @@ target_link_libraries(QtPiDeckServer
 
 target_include_directories(QtPiDeckServer
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-get_target_property(QtPiDeckCommon_SOURCE_DIR QtPiDeckCommon SOURCE_DIR)
-set(QML_IMPORT_PATH ${QtPiDeckCommon_SOURCE_DIR}/qml/components CACHE STRING "Qt Creator qml import paths" FORCE)

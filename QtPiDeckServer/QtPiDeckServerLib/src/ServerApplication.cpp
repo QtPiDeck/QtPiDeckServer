@@ -20,7 +20,7 @@ auto ServerApplication::mainPage() -> QUrl {
 void ServerApplication::initialPreparations() {
     Application::initialPreparations();
 
-    ioc().registerSingleton(std::make_shared<Services::MessageBus>(nullptr));
+    ioc().registerSingleton<Services::IMessageBus>(std::make_shared<Services::MessageBus>(nullptr));
     ioc().registerService<Services::IServerSettingsStorage, Services::SettingsStorage>();
 
 #if QT_VERSION_MAJOR < 6

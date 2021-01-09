@@ -36,4 +36,20 @@ auto SettingsStorage::deckServerPort() const noexcept -> QString {
 void SettingsStorage::setDeckServerPort(const QString& deckServerPort) noexcept {
     store(DeckServerPortKey, deckServerPort);
 }
+
+auto SettingsStorage::obsWebsocketAddress() const noexcept -> QString {
+    return read(ObsWebsocketAddressKey, ObsWebsocketAddressDefaultValue).toString();
+}
+
+void SettingsStorage::setObsWebsocketAddress(const QString& obsWebsocketAddress) noexcept {
+    store(ObsWebsocketAddressKey, obsWebsocketAddress);
+}
+
+auto SettingsStorage::obsWebsocketPort() const noexcept -> QString {
+    return read(ObsWebsocketPortKey, ObsWebsocketPortDefaultValue).toString();
+}
+
+void SettingsStorage::setObsWebsocketPort(const QString& obsWebsocketPort) noexcept {
+    store(ObsWebsocketPortKey, obsWebsocketPort);
+}
 }
