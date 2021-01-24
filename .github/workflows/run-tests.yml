@@ -15,13 +15,13 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: null }
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: null }
-        - { os: ubuntu-20.04, qt: 6.0.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["websocketpp"] }
-        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: null }
-        - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true, dependencies: null }
-        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: null }
-        - { os: macos-latest, qt: 6.0.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["websocketpp"] }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: null, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: null, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.0.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["websocketpp"], vcpkgtriplet: x64-linux }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: null, vcpkgtriplet: x64-windows }
+        - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true, dependencies: null, vcpkgtriplet: x64-windows }
+        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: null, vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.0.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["websocketpp"], vcpkgtriplet: x64-osx }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -86,8 +86,8 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
-            ./bootstrap-vcpkg.${{ fromJSON('["bat", "sh"]')[matrix.cfg.os == 'windows-latest'] }}
-            ./vcpkg install --triplet=${{ env.vcpkg-triplet }} ${{ join(matrix.cfg.dependencies, '') }}
+            ./bootstrap-vcpkg.${{ fromJSON('["bat", "sh"]')[matrix.cfg.os != 'windows-latest'] }}
+            ./vcpkg install --triplet=${{ matrix.cfg.vcpkgtriplet }} ${{ join(matrix.cfg.dependencies, '') }}
         working-directory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
         if: matrix.cfg.dependencies != null
 
