@@ -30,7 +30,7 @@ class SettingsViewModel : public QObject, public Services::UseServices<Services:
 #endif
 public:
     explicit SettingsViewModel(QObject* parent = nullptr) noexcept;
-    SettingsViewModel(QObject* parent, std::shared_ptr<Services::IServerSettingsStorage> settingsStorage) noexcept;
+    SettingsViewModel(QObject* parent, const std::shared_ptr<Services::IServerSettingsStorage> & settingsStorage) noexcept;
 
     [[nodiscard]] auto deckServerAddress() const noexcept -> QString { return m_deckServerAddress; }
     void setDeckServerAddress(const QString& deckServerAddress) noexcept;

@@ -8,7 +8,7 @@ SettingsViewModel::SettingsViewModel(QObject* parent) noexcept : SettingsViewMod
 }
 
 SettingsViewModel::SettingsViewModel(QObject* parent,
-                                     std::shared_ptr<Services::IServerSettingsStorage> settingsStorage) noexcept
+                                     const std::shared_ptr<Services::IServerSettingsStorage> & settingsStorage) noexcept
     : QObject(parent) {
     setService(settingsStorage);
     if (!settingsStorage) {
@@ -106,6 +106,6 @@ void createInto<ViewModels::SettingsViewModel>(void *memory) {
 #endif
     const auto& ioc = Application::current()->ioc();
     using viewModelType = QQmlElement<ViewModels::SettingsViewModel>;
-    [[maybe_unused]] auto _ = ioc.make<viewModelType, Services::CreationType::RawInMemory>(memory);
+    [[maybe_unused]] auto* _ = ioc.make<viewModelType, Services::CreationType::RawInMemory>(memory);
 }
 }

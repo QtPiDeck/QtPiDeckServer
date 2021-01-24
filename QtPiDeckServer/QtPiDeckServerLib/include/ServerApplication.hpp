@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "Network/DeckServer.hpp"
+#include "Network/Obs/ObsWebsocketClient.hpp"
 
 namespace QtPiDeck {
 class ServerApplication final : public QtPiDeck::Application {
@@ -16,5 +17,6 @@ protected:
 
 private:
     Network::DeckServer m_deckServer;
+    std::unique_ptr<Network::Obs::ObsWebsocketClient> m_obsWebsocketClient{};
 };
 }
