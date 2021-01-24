@@ -92,7 +92,7 @@ jobs:
         if: matrix.cfg.dependencies != null
 
       - name: Run cmake
-        run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/../QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
+        run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
         working-directory: build
         env:
           CC: ${{ matrix.cfg.cc }}
