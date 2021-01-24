@@ -7,6 +7,7 @@
 #endif
 
 #include <QDataStream>
+#include <QMetaEnum>
 
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
 #include "Network/Obs/ObsRequests.hpp"
@@ -47,7 +48,10 @@ void ObsWebsocketClient::connectToObs() noexcept {
       Bus::ObsMessages::GetAuthRequiredResponseReceived);
 }
 
-void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) { qCWarning(ObsWebsocket) << error; }
+void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) {
+  qCWarning(ObsWebsocket, "Connection error: %s",
+            QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error));
+}
 
 void ObsWebsocketClient::receivedTestMessage(QString message) {
   auto convertMessage = [&message] {
@@ -85,7 +89,7 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
   };
 
   if (m_authorized && !*m_authorized && isNotAllowedWithoutAuthorization(requestId)) {
-    qCWarning(ObsWebsocket) << "Refused to send request %1 without authorization"_qs.arg(RequestTypes.at(requestId));
+    qCWarning(ObsWebsocket, "Refused to send request %s without authorization", RequestTypesRaw.at(requestId));
     return;
   }
 

@@ -12,6 +12,8 @@
 #endif
 #include "ViewModels/SettingsViewModel.hpp"
 
+#include "Network/Obs/ObsRequests.hpp"
+
 static void initStaticResouces() {
   Q_INIT_RESOURCE(qml); // NOLINT
 }
