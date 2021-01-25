@@ -85,11 +85,21 @@ jobs:
         run: echo "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VER_FULL}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         if: matrix.cfg.os == 'windows-latest' && matrix.cfg.qt == '6.0.0'
 
-      - uses: lukka/run-vcpkg@main
+      - name: Get vcpkg commit sha
+        run: echo "::set-output name=sha::$(git rev-parse HEAD)"
+        shell: bash
+        working-directory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+        if: matrix.cfg.dependencies != null
+        id: vcpkgsha
+
+      - name: Cache vcpkg
+        uses: actions/cache@v2
         with:
-          vcpkgArguments: install --triplet=${{ matrix.cfg.vcpkgtriplet }} ${{ join(matrix.cfg.dependencies, ' ') }}
-          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}
+          path: |
+            QtPiDeckCommon/ext/vcpkg/buildtrees
+            QtPiDeckCommon/ext/vcpkg/installed
+            QtPiDeckCommon/ext/vcpkg/packages
+          key: vcpkg-${{ steps.vcpkgsha.outputs.sha }}-${{ join(matrix.cfg.dependencies, '-') }}
         if: matrix.cfg.dependencies != null
 
       - name: Install vcpkg dependencies
@@ -97,7 +107,7 @@ jobs:
             ./bootstrap-vcpkg.${{ fromJSON('["bat", "sh"]')[matrix.cfg.os != 'windows-latest'] }}
             ./vcpkg install --triplet=${{ matrix.cfg.vcpkgtriplet }} ${{ join(matrix.cfg.dependencies, ' ') }}
         working-directory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-        if: false # matrix.cfg.dependencies != null
+        if: matrix.cfg.dependencies != null
 
       - name: Run cmake
         run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
