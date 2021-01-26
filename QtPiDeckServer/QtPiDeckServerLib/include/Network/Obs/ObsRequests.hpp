@@ -15,7 +15,17 @@ inline auto operator"" _qs(const char* str, size_t /*unused*/) -> QString { retu
 
 inline auto operator"" _qls(const char* str, size_t /*unused*/) -> QLatin1String { return QLatin1String{str}; }
 
-enum General : uint16_t { GetAuthReqired, End };
+enum class General : uint16_t { GetAuthReqired, End };
+enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
+
+#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
+#define CONCEPT_BOOL
+#else
+#define CONCEPT_BOOL bool
+#endif
+
+template<class T>
+concept CONCEPT_BOOL ObsRequest = std::is_same_v<T, General> || std::is_same_v<T, MediaControl>;
 
 inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 
@@ -29,7 +39,4 @@ inline auto typesRawToQString() {
 }
 
 inline const std::array RequestTypes = detail::typesRawToQString();
-
-template <uint16_t ObjectId>
-auto ParseObsResponse(QStringView json);
 }

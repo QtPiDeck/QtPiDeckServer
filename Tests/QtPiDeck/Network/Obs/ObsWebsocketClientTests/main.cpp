@@ -2,21 +2,24 @@
 
 #include "Network/Obs/ObsWebsocketClient.hpp"
 
-namespace QtPiDeck::Services::Tests {
+namespace QtPiDeck::Network::Obs::Tests {
 class ObsWebsocketClientTests : public QObject {
-    Q_OBJECT // NOLINT
+  Q_OBJECT // NOLINT
 
 private slots:
-    void init();
+  void init();
+  //void
 
 private: // NOLINT(readability-redundant-access-specifiers)
+  ObsWebsocketClient client;
 };
 
-void ObsWebsocketClientTests::init() {
-}
+void ObsWebsocketClientTests::init() {}
+
+
 
 }
 
-QTEST_APPLESS_MAIN(QtPiDeck::Services::Tests::ObsWebsocketClientTests) // NOLINT
+QTEST_APPLESS_MAIN(QtPiDeck::Network::Obs::Tests::ObsWebsocketClientTests) // NOLINT
 
 #include "main.moc"

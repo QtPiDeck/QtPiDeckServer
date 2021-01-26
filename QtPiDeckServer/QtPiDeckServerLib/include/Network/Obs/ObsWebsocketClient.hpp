@@ -8,6 +8,7 @@
 #include <QLoggingCategory>
 
 #include "Bus/ObsMessages.hpp"
+#include "ObsRequests.hpp"
 #include "Services/IMessageBus.hpp"
 #include "Services/IObsMessageIdGenerator.hpp"
 #include "Services/IServerSettingsStorage.hpp"
@@ -38,6 +39,11 @@ public:
   }
 
   void connectToObs() noexcept;
+
+  template<ObsRequest TRequest>
+  void sendRequest(TRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
+    sendRequest(static_cast<uint16_t>(requestId), callbackMessageId);
+  }
 
   void sendRequest(uint16_t requestId, Bus::ObsMessages callbackMessageId) noexcept;
 

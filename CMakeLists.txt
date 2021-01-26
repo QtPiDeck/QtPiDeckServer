@@ -23,9 +23,14 @@ else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-#qt6 bindings
+# qt6 bindings
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
     add_compile_options(-Wno-invalid-offsetof)
+endif()
+
+# concepts
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+    add_compile_options(-fconcepts)
 endif()
 
 add_subdirectory(QtPiDeckCommon)

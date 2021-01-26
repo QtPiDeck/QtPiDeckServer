@@ -5,23 +5,22 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "ObsRequests.hpp"
 #include "ObsObjectsParsing.hpp"
+#include "ObsRequests.hpp"
 #include "ObsResponseStatus.hpp"
 
 namespace QtPiDeck::Network::Obs {
 struct GetAuthRequiredResponse : ObsResponseStatus {
-    bool authRequired{};
-    std::optional<QString> challenge{};
-    std::optional<QString> salt{};
-};
+  bool authRequired{};
+  std::optional<QString> challenge{};
+  std::optional<QString> salt{};
 
-template <>
-inline auto ParseObsResponse<General::GetAuthReqired>(QStringView json) {
+  static auto fromJson(QStringView json) noexcept -> GetAuthRequiredResponse {
     return withJsonObject<GetAuthRequiredResponse>(QJsonDocument::fromJson(json.toUtf8()).object())
-            .parse(&GetAuthRequiredResponse::authRequired, "authRequered"_qls)
-            .parse(&GetAuthRequiredResponse::challenge, "challenge"_qls)
-            .parse(&GetAuthRequiredResponse::salt, "salt"_qls)
-            .getResult();
-}
+        .parse(&GetAuthRequiredResponse::authRequired, "authRequered"_qls)
+        .parse(&GetAuthRequiredResponse::challenge, "challenge"_qls)
+        .parse(&GetAuthRequiredResponse::salt, "salt"_qls)
+        .getResult();
+  }
+};
 }

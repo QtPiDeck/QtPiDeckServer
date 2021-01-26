@@ -10,7 +10,6 @@
 #include <QMetaEnum>
 
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
-#include "Network/Obs/ObsRequests.hpp"
 
 Q_LOGGING_CATEGORY(ObsWebsocket, "ObsWebsocket") // NOLINT
 
@@ -30,7 +29,7 @@ void ObsWebsocketClient::connectToObs() noexcept {
   service<Services::IMessageBus>()->subscribe(
       this,
       [this](const Bus::Message& message) noexcept {
-        const auto obj = ParseObsResponse<General::GetAuthReqired>([&message]() noexcept {
+        const auto obj = GetAuthRequiredResponse::fromJson([&message]() noexcept {
           QDataStream qbs{message.payload};
           QString jsonText;
           qbs >> jsonText;
@@ -84,7 +83,7 @@ void ObsWebsocketClient::sendRequest(uint16_t requestId, Bus::ObsMessages callba
 void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
                               Bus::ObsMessages callbackMessageId) noexcept {
   auto isNotAllowedWithoutAuthorization = [](uint16_t id) noexcept {
-    constexpr std::array allowedRequests = {General::GetAuthReqired};
+    constexpr std::array allowedRequests = {static_cast<uint16_t>(General::GetAuthReqired)};
     return std::find(std::begin(allowedRequests), std::end(allowedRequests), id) == std::cend(allowedRequests);
   };
 

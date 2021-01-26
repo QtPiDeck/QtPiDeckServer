@@ -40,7 +40,7 @@ target_include_directories(QtPiDeckServerLib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if (${QT_VERSION_MAJOR} EQUAL 6)
-find_package(websocketpp CONFIG REQUIRED)
+    find_package(websocketpp CONFIG REQUIRED)
 endif()
 
 target_link_libraries(QtPiDeckServerLib
