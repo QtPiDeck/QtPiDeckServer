@@ -18,7 +18,7 @@ inline auto operator"" _qls(const char* str, size_t /*unused*/) -> QLatin1String
 enum class General : uint16_t { GetAuthReqired, End };
 enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
 
-#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
+#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) || defined(__APPLE__) // because reasons
 #define CONCEPT_BOOL
 #else
 #define CONCEPT_BOOL bool
