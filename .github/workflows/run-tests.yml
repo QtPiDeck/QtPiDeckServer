@@ -93,6 +93,7 @@ jobs:
         id: vcpkgsha
 
       - name: Cache vcpkg
+        id: vcpkg-cache
         uses: actions/cache@v2
         with:
           path: |
@@ -107,7 +108,7 @@ jobs:
             ./bootstrap-vcpkg.${{ fromJSON('["bat", "sh"]')[matrix.cfg.os != 'windows-latest'] }}
             ./vcpkg install --triplet=${{ matrix.cfg.vcpkgtriplet }} ${{ join(matrix.cfg.dependencies, ' ') }}
         working-directory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-        if: matrix.cfg.dependencies != null
+        if: matrix.cfg.dependencies != null && steps.vcpkg-cache.outputs.cache-hit != 'true'
 
       - name: Run cmake
         run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
