@@ -28,8 +28,12 @@ struct field_type<std::optional<T>> : field_type<T> {};
 template<class T>
 using field_type_t = typename field_type<T>::type;
 
+#ifndef APPLE_CLANG
 template<class T>
 concept Field = std::is_same_v<field_type_t<T>, QString> || std::is_same_v<field_type_t<T>, bool>;
+#else
+#define Field class
+#endif
 
 template<Field TField>
 void setValue(TField& field, const QJsonValue& value) noexcept {
