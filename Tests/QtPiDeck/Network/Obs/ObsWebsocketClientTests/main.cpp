@@ -11,7 +11,7 @@ private slots:
   //void
 
 private: // NOLINT(readability-redundant-access-specifiers)
-  ObsWebsocketClient client;
+  std::unique_ptr<ObsWebsocketClient> client;
 };
 
 void ObsWebsocketClientTests::init() {}

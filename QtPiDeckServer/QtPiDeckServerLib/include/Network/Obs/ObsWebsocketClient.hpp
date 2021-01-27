@@ -28,6 +28,8 @@ public:
   template <class... TServices>
   ObsWebsocketClient(const std::shared_ptr<TServices>&... services) noexcept {
     (setService<TServices>(std::move(services)), ...);
+    constexpr size_t numberOfServices = 4;
+    static_assert (sizeof...(TServices) == numberOfServices);
     auto& webSocket = service<Services::IWebSocket>();
     webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
     webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
@@ -42,8 +44,6 @@ public:
 
   template<ObsRequest TRequest>
   void sendRequest(TRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
-    std::variant<General, MediaControl> d;
-    [[maybe_unused]] auto k = std::get<General>(d);
     sendRequest(static_cast<uint16_t>(requestId), callbackMessageId);
   }
 
