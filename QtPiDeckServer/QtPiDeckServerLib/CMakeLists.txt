@@ -51,5 +51,11 @@ target_link_libraries(QtPiDeckServerLib
     $<$<EQUAL:${QT_VERSION_MAJOR},6>:websocketpp::websocketpp>
     QtPiDeckCommon)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    target_compile_definitions(QtPiDeckServerLib
+        PUBLIC
+        APPLE_CLANG)
+endif()
+
 get_target_property(QtPiDeckCommon_SOURCE_DIR QtPiDeckCommon SOURCE_DIR)
 set(QML_IMPORT_PATH ${QtPiDeckCommon_SOURCE_DIR}/qml/components CACHE STRING "Qt Creator qml import paths" FORCE)

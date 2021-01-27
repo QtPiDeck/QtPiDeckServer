@@ -42,6 +42,8 @@ public:
 
   template<ObsRequest TRequest>
   void sendRequest(TRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
+    std::variant<General, MediaControl> d;
+    [[maybe_unused]] auto k = std::get<General>(d);
     sendRequest(static_cast<uint16_t>(requestId), callbackMessageId);
   }
 

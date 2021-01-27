@@ -18,7 +18,8 @@ inline auto operator"" _qls(const char* str, size_t /*unused*/) -> QLatin1String
 enum class General : uint16_t { GetAuthReqired, End };
 enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
 
-#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) || defined(__APPLE__) // because reasons
+#if !defined(APPLE_CLANG)
+#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
 #define CONCEPT_BOOL
 #else
 #define CONCEPT_BOOL bool
@@ -26,6 +27,9 @@ enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(Gene
 
 template<class T>
 concept CONCEPT_BOOL ObsRequest = std::is_same_v<T, General> || std::is_same_v<T, MediaControl>;
+#else
+#define ObsRequest class
+#endif
 
 inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 
