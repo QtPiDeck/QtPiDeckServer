@@ -96,11 +96,8 @@ jobs:
         id: vcpkg-cache
         uses: actions/cache@v2
         with:
-          path: |
-            QtPiDeckCommon/ext/vcpkg/buildtrees
-            QtPiDeckCommon/ext/vcpkg/installed
-            QtPiDeckCommon/ext/vcpkg/packages
-          key: vcpkg-${{ steps.vcpkgsha.outputs.sha }}-${{ join(matrix.cfg.dependencies, '-') }}
+          path: QtPiDeckCommon/ext/vcpkg
+          key: vcpkg-${{ steps.vcpkgsha.outputs.sha }}-${{ join(matrix.cfg.dependencies, '-') }}-all
         if: matrix.cfg.dependencies != null
 
       - name: Install vcpkg dependencies
