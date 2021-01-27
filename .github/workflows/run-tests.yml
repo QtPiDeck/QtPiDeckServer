@@ -105,7 +105,7 @@ jobs:
             ./bootstrap-vcpkg.${{ fromJSON('["bat", "sh"]')[matrix.cfg.os != 'windows-latest'] }}
             ./vcpkg install --triplet=${{ matrix.cfg.vcpkgtriplet }} ${{ join(matrix.cfg.dependencies, ' ') }}
         working-directory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-        if: matrix.cfg.dependencies != null && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        if: matrix.cfg.dependencies != null && (steps.vcpkg-cache.outputs.cache-hit != 'true' || matrix.cfg.os == 'macos-latest')
 
       - name: Run cmake
         run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
