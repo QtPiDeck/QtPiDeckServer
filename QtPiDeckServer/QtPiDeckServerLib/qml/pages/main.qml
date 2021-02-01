@@ -80,7 +80,7 @@ Window {
 
         Button {
             text: qsTr("Save settings")
-            onClicked: settingsViewModel.saveSettings();
+            onClicked: {settingsViewModel.saveSettings()}
 
             anchors.right: parent.right
         }
