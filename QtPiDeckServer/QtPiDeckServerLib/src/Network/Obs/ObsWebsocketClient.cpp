@@ -101,8 +101,7 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
     return QJsonDocument{obj};
   }();
 
-  const auto jsonText = doc.toJson(QJsonDocument::Compact);
-  const auto jsonString = QLatin1String{jsonText};
+  const auto jsonString = QLatin1String{doc.toJson(QJsonDocument::Compact)};
 
   [[maybe_unused]] auto sendResult = service<Services::IWebSocket>()->send(jsonString);
 }
