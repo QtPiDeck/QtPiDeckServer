@@ -91,6 +91,7 @@ jobs:
           appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}
           vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
           vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }}
+          doNotUpdateVcpkg: true
         if: matrix.cfg.dependencies != null
 
       - name: Run cmake
