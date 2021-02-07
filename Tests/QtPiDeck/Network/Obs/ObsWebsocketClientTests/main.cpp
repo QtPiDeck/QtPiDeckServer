@@ -110,7 +110,7 @@ public:
   void setConnectedHandler(ConnectedHandler handler) noexcept final { m_handler = handler; }
   auto send(QLatin1String message) noexcept -> std::optional<SendingError> final {
     m_data.resize(message.size());
-    memcpy_s(m_data.data(), m_data.size(), message.data(), message.size());
+    std::memcpy(m_data.data(), message.data(), message.size());
     m_message = QLatin1String{m_data};
     return {};
   }
