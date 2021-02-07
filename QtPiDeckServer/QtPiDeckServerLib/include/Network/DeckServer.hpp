@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTcpServer>
 
+#include "Services/IMessageBus.hpp"
 #include "Application.hpp"
 
 namespace QtPiDeck::Network {
@@ -31,5 +32,7 @@ private:
     QTcpServer m_server;
     QTcpSocket *m_socket{};
     std::optional<QMetaObject::Connection> m_serverConnection;
+
+    Services::Subscription m_sub;
 };
 }

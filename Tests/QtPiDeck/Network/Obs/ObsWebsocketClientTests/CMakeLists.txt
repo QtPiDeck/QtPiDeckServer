@@ -1,1 +1,1 @@
-add_cpp_test()
+add_catch_cpp_test()

@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: null, vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: null, vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.0.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["websocketpp"], vcpkgtriplet: x64-linux }
-        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: null, vcpkgtriplet: x64-windows }
-        - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true, dependencies: ["websocketpp"], vcpkgtriplet: x64-windows }
-        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: null, vcpkgtriplet: x64-osx }
-        - { os: macos-latest, qt: 6.0.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["websocketpp"], vcpkgtriplet: x64-osx }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: ["catch2"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: ["catch2"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.0.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["websocketpp", "catch2"], vcpkgtriplet: x64-linux }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: ["catch2"], vcpkgtriplet: x64-windows }
+        - { os: windows-latest, qt: 6.0.0, cc: cl, cxx: cl, experimental: true, dependencies: ["websocketpp", "catch2"], vcpkgtriplet: x64-windows }
+        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: ["catch2"], vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.0.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["websocketpp", "catch2"], vcpkgtriplet: x64-osx }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}

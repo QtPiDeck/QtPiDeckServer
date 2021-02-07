@@ -4,6 +4,8 @@ project(QtPiDeckServer LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core)
 
+mark_as_advanced(QT_QMAKE_EXECUTABLE)
+
 include(CTest)
 
 set(CMAKE_AUTOUIC ON)
@@ -24,12 +26,12 @@ else()
 endif()
 
 # qt6 bindings
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
     add_compile_options(-Wno-invalid-offsetof)
 endif()
 
 # concepts
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10.0)
     add_compile_options(-fconcepts)
 endif()
 

@@ -6,10 +6,7 @@
 #include <QIODevice>
 #endif
 
-#include <QDataStream>
 #include <QMetaEnum>
-
-#include "Network/Obs/GetAuthRequiredResponse.hpp"
 
 Q_LOGGING_CATEGORY(ObsWebsocket, "ObsWebsocket") // NOLINT
 
@@ -25,26 +22,6 @@ void ObsWebsocketClient::connectToObs() noexcept {
   }();
 
   service<Services::IWebSocket>()->connect(obsAddress);
-
-  service<Services::IMessageBus>()->subscribe(
-      this,
-      [this](const Bus::Message& message) noexcept {
-        const auto obj = GetAuthRequiredResponse::fromJson([&message]() noexcept {
-          QDataStream qbs{message.payload};
-          QString jsonText;
-          qbs >> jsonText;
-          return jsonText;
-        }());
-
-        if (!isRequestSuccessful(obj)) {
-          qWarning() << "Failed to check authorization(%1)"_qls.arg(*obj.error);
-          m_authorized = false;
-          return;
-        }
-
-        m_authorized = !obj.authRequired;
-      },
-      Bus::ObsMessages::GetAuthRequiredResponseReceived);
 }
 
 void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) {
@@ -59,8 +36,6 @@ void ObsWebsocketClient::receivedTestMessage(QString message) {
     qds << message;
     return qba;
   };
-
-  qDebug().noquote() << message;
 
   if (const auto obj = QJsonDocument::fromJson(message.toUtf8()).object(); obj.contains("update-type"_qls)) {
     // to be implemented
@@ -101,7 +76,8 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
     return QJsonDocument{obj};
   }();
 
-  const auto jsonString = QLatin1String{doc.toJson(QJsonDocument::Compact)};
+  const auto byteArray = doc.toJson(QJsonDocument::Compact);
+  const auto jsonString = QLatin1String{byteArray};
 
   [[maybe_unused]] auto sendResult = service<Services::IWebSocket>()->send(jsonString);
 }
