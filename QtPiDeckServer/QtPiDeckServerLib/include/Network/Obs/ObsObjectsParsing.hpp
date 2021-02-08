@@ -28,9 +28,15 @@ struct field_type<std::optional<T>> : field_type<T> {};
 template<class T>
 using field_type_t = typename field_type<T>::type;
 
-#ifndef APPLE_CLANG
+#if !defined(APPLE_CLANG)
+#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
+#define CONCEPT_BOOL
+#else
+#define CONCEPT_BOOL bool
+#endif
+
 template<class T>
-concept Field = std::is_same_v<field_type_t<T>, QString> || std::is_same_v<field_type_t<T>, bool>;
+concept CONCEPT_BOOL Field = std::is_same_v<field_type_t<T>, QString> || std::is_same_v<field_type_t<T>, bool>;
 #else
 #define Field class
 #endif

@@ -14,7 +14,7 @@ DeckServer::DeckServer(QObject *parent) : QObject(parent) {
 
 void DeckServer::start() {
     connectToServerSignal();
-    Services::subscribe(*Application::current()->ioc().resolveService<Services::IMessageBus>(), this, &DeckServer::sendPong, DeckMessages::PingReceived);
+    m_sub = Services::subscribe(*Application::current()->ioc().resolveService<Services::IMessageBus>(), this, &DeckServer::sendPong, DeckMessages::PingReceived);
     // default port and address will be in global config
     constexpr qint16 defaultPort = 13000;
     if(!m_server.listen(QHostAddress::LocalHost, defaultPort)) {
