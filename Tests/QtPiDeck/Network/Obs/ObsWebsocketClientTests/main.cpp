@@ -133,6 +133,5 @@ TEST_CASE("ObsWebsocketClient asks authentification after connecting", "[ObsWebs
   client->connectToObs();
   auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
   casted->connected();
-  auto msg = casted->message();
   REQUIRE(casted->message().contains(QLatin1String{RequestTypesRaw[static_cast<uint16_t>(General::GetAuthReqired)]}));
 }
