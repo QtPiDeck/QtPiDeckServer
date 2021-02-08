@@ -19,8 +19,6 @@ static void initStaticResouces() {
 }
 
 namespace QtPiDeck {
-ServerApplication::ServerApplication() = default;
-
 auto ServerApplication::mainPage() -> QUrl { return QUrl{QStringLiteral("qrc:/qml/pages/main.qml")}; }
 
 void ServerApplication::initialPreparations() {
@@ -43,10 +41,12 @@ void ServerApplication::initialPreparations() {
 void ServerApplication::appCreated() { initStaticResouces(); }
 
 void ServerApplication::engineCreated(QQmlApplicationEngine& engine) {
+  m_deckServer = ioc().make<Network::DeckServer>();
+
   // during early testing(server and client in app) communication was broken
   // starting server this way fixes a problem
   // might need additional testing when client side app is ready to connect
-  QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &m_deckServer, // clazy:exclude=connect-non-signal
+  QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, m_deckServer.get(), // clazy:exclude=connect-non-signal
                    &Network::DeckServer::start);
 
   engine.addImportPath("qrc:/qml/components");

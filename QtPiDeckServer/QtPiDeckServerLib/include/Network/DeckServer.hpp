@@ -5,34 +5,32 @@
 #include <QObject>
 #include <QTcpServer>
 
-#include "Services/IMessageBus.hpp"
 #include "Application.hpp"
+#include "Services/IMessageBus.hpp"
 
 namespace QtPiDeck::Network {
 
-enum DeckMessages : uint64_t {
-    PingReceived = 0x100
-};
+enum DeckMessages : uint64_t { PingReceived = 0x100 };
 
-class DeckServer : public QObject {
-    Q_OBJECT // NOLINT
+class DeckServer : public QObject, public Services::UseServices<Services::IMessageBus> {
+  Q_OBJECT // NOLINT
 public:
-    explicit DeckServer(QObject *parent = nullptr);
+  explicit DeckServer(QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus);
 
-    void start();
+  void start();
 
 public slots: // NOLINT(readability-redundant-access-specifiers)
-    void handleConnection();
-    void readData();
+  void handleConnection();
+  void readData();
 
 private:
-    void connectToServerSignal();
-    void sendPong();
+  void connectToServerSignal();
+  void sendPong();
 
-    QTcpServer m_server;
-    QTcpSocket *m_socket{};
-    std::optional<QMetaObject::Connection> m_serverConnection;
+  QTcpServer m_server;
+  QTcpSocket* m_socket{};
+  std::optional<QMetaObject::Connection> m_serverConnection;
 
-    Services::Subscription m_sub;
+  Services::Subscription m_sub;
 };
 }
