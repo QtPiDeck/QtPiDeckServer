@@ -14,7 +14,8 @@ DeckServer::DeckServer(QObject* parent, std::shared_ptr<Services::IMessageBus> m
 
 void DeckServer::start() {
   connectToServerSignal();
-  m_sub = Services::subscribe(*service<Services::IMessageBus>(), this, &DeckServer::sendPong, DeckMessages::PingReceived);
+  m_sub =
+      Services::subscribe(*service<Services::IMessageBus>(), this, &DeckServer::sendPong, DeckMessages::PingReceived);
   // default port and address will be in global config
   constexpr qint16 defaultPort = 13000;
   if (!m_server.listen(QHostAddress::LocalHost, defaultPort)) {
@@ -35,8 +36,15 @@ void writeObject(const T& object, QTcpSocket* socket) {
 }
 }
 
-void DeckServer::sendPong() {
-  writeObject(MessageHeader{0, MessageId::Pong}, m_socket);
+void DeckServer::sendPong(const Bus::Message& message) {
+  const auto requestId = [&message]() noexcept {
+    QString value;
+    QDataStream qds{message.payload};
+    qds >> value;
+    return value;
+  }();
+  qDebug() << "Sending pong" << requestId;
+  writeObject(GetEmptyMessageHeader(MessageType::Pong, requestId), m_socket);
   m_socket->flush();
 }
 
@@ -50,13 +58,17 @@ void DeckServer::handleConnection() {
   connect(m_socket, &QTcpSocket::readyRead, this, &DeckServer::readData);
 }
 
-namespace {
-void processMessage(const QtPiDeck::Network::MessageHeader& header) {
-  switch (header.messageId) {
-  case QtPiDeck::Network::MessageId::Ping:
-    qDebug() << "Got ping";
-    Application::current()->ioc().resolveService<Services::IMessageBus>()->sendMessage(
-        Bus::Message{DeckMessages::PingReceived});
+void DeckServer::processMessage(const QtPiDeck::Network::MessageHeader& header) noexcept {
+  auto sendMessage = [this](DeckMessages messageType, QString requestId) {
+    QByteArray payload;
+    QDataStream qds{&payload, QIODevice::WriteOnly};
+    qds << requestId;
+    service<Services::IMessageBus>()->sendMessage(Bus::Message{messageType, payload});
+  };
+  switch (header.messageType) {
+  case QtPiDeck::Network::MessageType::Ping:
+    qDebug() << "Got ping" << header.requestId;
+    sendMessage(DeckMessages::PingReceived, header.requestId);
     break;
   default:
     qWarning() << "Unhandled message";
@@ -64,6 +76,7 @@ void processMessage(const QtPiDeck::Network::MessageHeader& header) {
   }
 }
 
+namespace {
 template<class T>
 auto readObject(QTcpSocket* socket) -> std::optional<T> {
   DeckDataStream inStream{socket};

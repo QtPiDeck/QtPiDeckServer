@@ -6,6 +6,7 @@
 #include <QTcpServer>
 
 #include "Application.hpp"
+#include "Network/MessageHeader.hpp"
 #include "Services/IMessageBus.hpp"
 
 namespace QtPiDeck::Network {
@@ -25,7 +26,8 @@ public slots: // NOLINT(readability-redundant-access-specifiers)
 
 private:
   void connectToServerSignal();
-  void sendPong();
+  void sendPong(const Bus::Message&);
+  void processMessage(const QtPiDeck::Network::MessageHeader& header) noexcept;
 
   QTcpServer m_server;
   QTcpSocket* m_socket{};
