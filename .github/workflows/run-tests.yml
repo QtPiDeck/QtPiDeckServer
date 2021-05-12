@@ -90,7 +90,7 @@ jobs:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
           appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}
           vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
-          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/ext/vcpkg-tripltets/
+          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg-tripltets/
           doNotUpdateVcpkg: true
         if: matrix.cfg.dependencies != null
 
