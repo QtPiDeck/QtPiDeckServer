@@ -73,3 +73,7 @@ Thumbs.db
 
 CMakeLists.txt.user
 *.qmlc
+
+.vs
+out
+CMakeSettings.json
