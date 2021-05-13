@@ -44,7 +44,7 @@ void DeckServer::sendPong(const Bus::Message& message) {
     return value;
   }();
   qDebug() << "Sending pong" << requestId;
-  writeObject(GetEmptyMessageHeader(MessageType::Pong, requestId), m_socket);
+  writeObject(getEmptyMessageHeader(MessageType::Pong, requestId), m_socket);
   m_socket->flush();
 }
 
