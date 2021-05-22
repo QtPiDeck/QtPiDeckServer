@@ -8,6 +8,15 @@
 #include "Services/IServerSettingsStorage.hpp"
 
 namespace QtPiDeck::Services {
+template<class TVal>
+struct FieldData {
+  QString key;
+  TVal defaultValue;
+};
+
+template<class TVal>
+FieldData(QString b, TVal e) -> FieldData<TVal>;
+
 class SettingsStorage final : public IServerSettingsStorage {
 public:
   SettingsStorage();
@@ -33,15 +42,6 @@ public:
 
 private:
   std::unique_ptr<QSettings> m_settings;
-
-  template<class TVal>
-  struct FieldData {
-    QString key;
-    TVal defaultValue;
-  };
-
-  template<class TVal>
-  FieldData(QString b, TVal e) -> FieldData<TVal>;
 
   inline static const FieldData DeckServerAddress{"DeckServerAddress"_qs, "127.0.0.1"_qs};
   inline static const FieldData DeckServerPort{"DeckServerPort"_qs, "13000"_qs};
