@@ -9,7 +9,7 @@ else()
     find_package(Qt6 COMPONENTS Quick Network REQUIRED)
 endif()
 
-find_package(Boost COMPONENTS headers REQUIRED)
+find_package(Boost REQUIRED)
 
 add_library(QtPiDeckServerLib STATIC
     src/ServerApplication.cpp
