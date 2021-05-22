@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: ["boost-test"], vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: ["boost-test"], vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["boost-test", "websocketpp"], vcpkgtriplet: x64-linux }
-        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: ["boost-test"], vcpkgtriplet: x64-windows }
-        - { os: windows-latest, qt: 6.1.0, cc: cl, cxx: cl, experimental: true, dependencies: ["boost-test", "websocketpp"], vcpkgtriplet: x64-windows }
-        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: ["boost-test"], vcpkgtriplet: x64-osx }
-        - { os: macos-latest, qt: 6.1.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["boost-test", "websocketpp"], vcpkgtriplet: x64-osx }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: ["boost-test", "boost-algorithm"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: ["boost-test", "boost-algorithm"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-algorithm"], vcpkgtriplet: x64-linux }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: ["boost-test", "boost-algorithm"], vcpkgtriplet: x64-windows }
+        - { os: windows-latest, qt: 6.1.0, cc: cl, cxx: cl, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-algorithm"], vcpkgtriplet: x64-windows }
+        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: ["boost-test", "boost-algorithm"], vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.1.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-algorithm"], vcpkgtriplet: x64-osx }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -88,7 +88,7 @@ jobs:
       - uses: lukka/run-vcpkg@v6
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}
+          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-tmp
           vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
           vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg-tripltets/
           doNotUpdateVcpkg: true
