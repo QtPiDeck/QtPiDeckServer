@@ -1,9 +1,7 @@
 #include "Services/WebSocketQt.hpp"
 
 namespace QtPiDeck::Services {
-void WebSocketQt::connect(QStringView address) noexcept {
-  m_webSocket.open(QUrl{address.toString()});
-}
+void WebSocketQt::connect(QStringView address) noexcept { m_webSocket.open(QUrl{address.toString()}); }
 
 void WebSocketQt::disconnect() noexcept { m_webSocket.close(); }
 

@@ -4,52 +4,48 @@
 
 namespace QtPiDeck::Services {
 SettingsStorage::SettingsStorage() {
-    QCoreApplication::setOrganizationName("QtPiDeck");
-    QCoreApplication::setOrganizationDomain("qtpideck.com");
-    QCoreApplication::setApplicationName("QtPiDeckServer");
+  QCoreApplication::setOrganizationName("QtPiDeck");
+  QCoreApplication::setOrganizationDomain("qtpideck.com");
+  QCoreApplication::setApplicationName("QtPiDeckServer");
 
-    m_settings = std::make_unique<QSettings>(nullptr);
+  m_settings = std::make_unique<QSettings>(nullptr);
 }
 
-auto SettingsStorage::read(const QString& key, const QVariant& defaultValue) const noexcept -> QVariant
-{
-    return m_settings->value(key, defaultValue);
+auto SettingsStorage::read(const QString& key, const QVariant& defaultValue) const noexcept -> QVariant {
+  return m_settings->value(key, defaultValue);
 }
 
-void SettingsStorage::store(const QString& key, const QVariant& value) noexcept
-{
-    m_settings->setValue(key, value);
-}
+void SettingsStorage::store(const QString& key, const QVariant& value) noexcept { m_settings->setValue(key, value); }
 
 auto SettingsStorage::deckServerAddress() const noexcept -> QString {
-    return read(DeckServerAddressKey, DeckServerAddressDefaultValue).toString();
+  return read(DeckServerAddress.key, DeckServerAddress.defaultValue).toString();
 }
 
 void SettingsStorage::setDeckServerAddress(const QString& deckServerAddress) noexcept {
-    store(DeckServerAddressKey, deckServerAddress);
+  store(DeckServerAddress.key, deckServerAddress);
 }
 
 auto SettingsStorage::deckServerPort() const noexcept -> QString {
-    return read(DeckServerPortKey, DeckServerPortDefaultValue).toString();
+  return read(DeckServerPort.key, DeckServerPort.defaultValue).toString();
 }
 
 void SettingsStorage::setDeckServerPort(const QString& deckServerPort) noexcept {
-    store(DeckServerPortKey, deckServerPort);
+  store(DeckServerPort.key, deckServerPort);
 }
 
 auto SettingsStorage::obsWebsocketAddress() const noexcept -> QString {
-    return read(ObsWebsocketAddressKey, ObsWebsocketAddressDefaultValue).toString();
+  return read(ObsWebsocketAddress.key, ObsWebsocketAddress.defaultValue).toString();
 }
 
 void SettingsStorage::setObsWebsocketAddress(const QString& obsWebsocketAddress) noexcept {
-    store(ObsWebsocketAddressKey, obsWebsocketAddress);
+  store(ObsWebsocketAddress.key, obsWebsocketAddress);
 }
 
 auto SettingsStorage::obsWebsocketPort() const noexcept -> QString {
-    return read(ObsWebsocketPortKey, ObsWebsocketPortDefaultValue).toString();
+  return read(ObsWebsocketPort.key, ObsWebsocketPort.defaultValue).toString();
 }
 
 void SettingsStorage::setObsWebsocketPort(const QString& obsWebsocketPort) noexcept {
-    store(ObsWebsocketPortKey, obsWebsocketPort);
+  store(ObsWebsocketPort.key, obsWebsocketPort);
 }
 }

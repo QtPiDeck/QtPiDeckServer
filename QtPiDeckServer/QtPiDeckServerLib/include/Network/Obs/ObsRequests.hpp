@@ -7,24 +7,13 @@
 #include <QJsonObject>
 #include <QString>
 
+#include "QtPiDeckServerDefines.hpp"
+
 namespace QtPiDeck::Network::Obs {
-
-// I believe I had this suffix before
-// But I still need to move it to common
-inline auto operator"" _qs(const char* str, size_t /*unused*/) -> QString { return QString{str}; }
-
-inline auto operator"" _qls(const char* str, size_t /*unused*/) -> QLatin1String { return QLatin1String{str}; }
-
 enum class General : uint16_t { GetAuthReqired, End };
 enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
 
 #if !defined(APPLE_CLANG)
-#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
-#define CONCEPT_BOOL
-#else
-#define CONCEPT_BOOL bool
-#endif
-
 template<class T>
 concept CONCEPT_BOOL ObsRequest = std::is_same_v<T, General> || std::is_same_v<T, MediaControl>;
 #else
