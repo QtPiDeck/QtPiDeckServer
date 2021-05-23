@@ -105,8 +105,8 @@ class ConnectedWebSocket final : public NoopWebSocket {
 public:
   void setConnectedHandler(ConnectedHandler handler) noexcept final { m_handler = handler; }
   auto send(QLatin1String message) noexcept -> std::optional<SendingError> final {
-    m_data.resize(message.size());
-    std::memcpy(m_data.data(), message.data(), message.size());
+    m_data.resize(std::size(message));
+    std::memcpy(std::data(m_data), std::data(message), std::size(message));
     m_message = QLatin1String{m_data};
     return {};
   }

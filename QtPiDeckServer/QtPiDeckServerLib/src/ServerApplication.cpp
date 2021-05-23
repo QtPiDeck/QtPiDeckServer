@@ -19,7 +19,7 @@ static void initStaticResouces() {
 }
 
 namespace QtPiDeck {
-auto ServerApplication::mainPage() -> QUrl { return QUrl{QStringLiteral("qrc:/qml/pages/main.qml")}; }
+auto ServerApplication::mainPage() -> QUrl { return "qrc:/qml/pages/main.qml"_qurl; }
 
 void ServerApplication::initialPreparations() {
   Application::initialPreparations();
@@ -46,10 +46,10 @@ void ServerApplication::engineCreated(QQmlApplicationEngine& engine) {
   // during early testing(server and client in app) communication was broken
   // starting server this way fixes a problem
   // might need additional testing when client side app is ready to connect
-  QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, m_deckServer.get(), // clazy:exclude=connect-non-signal
-                   &Network::DeckServer::start);
+  QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, // clazy:exclude=connect-non-signal
+                   m_deckServer.get(), &Network::DeckServer::start);
 
-  engine.addImportPath("qrc:/qml/components");
+  engine.addImportPath("qrc:/qml/components"_qs);
 
   ViewModels::SettingsViewModel::registerType();
 

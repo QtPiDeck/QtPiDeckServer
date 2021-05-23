@@ -1,5 +1,6 @@
 #include "Network/Obs/ObsWebsocketClient.hpp"
 
+#include "boost/algorithm/cxx11/any_of.hpp"
 #include <algorithm>
 
 #if QT_VERSION_MAJOR == 6
@@ -14,11 +15,8 @@ namespace QtPiDeck::Network::Obs {
 void ObsWebsocketClient::connectToObs() noexcept {
   m_authorized.reset();
   const auto obsAddress = [settings = service<Services::IServerSettingsStorage>(), protocol = WebSocketProtocol] {
-    if (settings) {
-      return "%1%2:%3"_qls.arg(protocol, settings->obsWebsocketAddress(), settings->obsWebsocketPort());
-    }
-
-    return "%1%2"_qls.arg(protocol, DefaultAddress);
+    return settings ? "%1%2:%3"_qls.arg(protocol, settings->obsWebsocketAddress(), settings->obsWebsocketPort())
+                    : "%1%2"_qls.arg(protocol, DefaultAddress);
   }();
 
   service<Services::IWebSocket>()->connect(obsAddress);
@@ -59,7 +57,7 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
                               Bus::ObsMessages callbackMessageId) noexcept {
   auto isNotAllowedWithoutAuthorization = [](uint16_t id) noexcept {
     constexpr std::array allowedRequests = {static_cast<uint16_t>(General::GetAuthReqired)};
-    return std::find(std::begin(allowedRequests), std::end(allowedRequests), id) == std::cend(allowedRequests);
+    return boost::algorithm::any_of_equal(allowedRequests, id);
   };
 
   if (m_authorized && !*m_authorized && isNotAllowedWithoutAuthorization(requestId)) {

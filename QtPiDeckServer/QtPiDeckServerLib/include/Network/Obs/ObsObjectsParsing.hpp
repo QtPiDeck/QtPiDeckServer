@@ -7,6 +7,8 @@
 #include <QJsonObject>
 #include <QString>
 
+#include "QtPiDeckServerDefines.hpp"
+
 namespace QtPiDeck::Network::Obs {
 template<class T>
 struct is_optional : std::false_type {};
@@ -29,12 +31,6 @@ template<class T>
 using field_type_t = typename field_type<T>::type;
 
 #if !defined(APPLE_CLANG)
-#if __cpp_concepts >= 201907L || (defined(_MSC_VER) && __cpp_concepts >= 201811L) // because reasons
-#define CONCEPT_BOOL
-#else
-#define CONCEPT_BOOL bool
-#endif
-
 template<class T>
 concept CONCEPT_BOOL Field = std::is_same_v<field_type_t<T>, QString> || std::is_same_v<field_type_t<T>, bool>;
 #else
