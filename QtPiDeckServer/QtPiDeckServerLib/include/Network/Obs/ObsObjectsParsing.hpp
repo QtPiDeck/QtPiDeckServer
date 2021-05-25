@@ -7,7 +7,7 @@
 #include <QJsonObject>
 #include <QString>
 
-#include "QtPiDeckServerDefines.hpp"
+#include "QtPiDeckServerDefinitions.hpp"
 
 namespace QtPiDeck::Network::Obs {
 template<class T>

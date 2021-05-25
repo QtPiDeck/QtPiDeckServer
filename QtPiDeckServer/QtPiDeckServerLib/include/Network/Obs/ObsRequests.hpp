@@ -7,7 +7,7 @@
 #include <QJsonObject>
 #include <QString>
 
-#include "QtPiDeckServerDefines.hpp"
+#include "QtPiDeckServerDefinitions.hpp"
 
 namespace QtPiDeck::Network::Obs {
 enum class General : uint16_t { GetAuthReqired, End };

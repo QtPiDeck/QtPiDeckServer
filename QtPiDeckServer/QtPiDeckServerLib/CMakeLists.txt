@@ -2,11 +2,11 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core)
 
 # temporal solution while waiting for Qt6::WebSockets
 if (${QT_VERSION_MAJOR} EQUAL 5)
-    find_package(QT NAMES Qt5 COMPONENTS Quick Network WebSockets REQUIRED)
-    find_package(Qt5 COMPONENTS Quick Network WebSockets REQUIRED)
+    find_package(QT NAMES Qt5 COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
+    find_package(Qt5 COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
 else()
-    find_package(QT NAMES Qt6 COMPONENTS Quick Network REQUIRED)
-    find_package(Qt6 COMPONENTS Quick Network REQUIRED)
+    find_package(QT NAMES Qt6 COMPONENTS Quick Network QuickControls2 REQUIRED)
+    find_package(Qt6 COMPONENTS Quick Network QuickControls2 REQUIRED)
 endif()
 
 find_package(Boost REQUIRED)
@@ -35,7 +35,7 @@ add_library(QtPiDeckServerLib STATIC
     include/Services/ObsMessageIdGenerator.hpp
     include/Services/SettingsStorage.hpp
     include/ViewModels/SettingsViewModel.hpp
-    include/QtPiDeckServerDefines.hpp
+    include/QtPiDeckServerDefinitions.hpp
     qml.qrc)
 
 target_include_directories(QtPiDeckServerLib
@@ -49,10 +49,12 @@ target_link_libraries(QtPiDeckServerLib
     PUBLIC
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::QuickControls2
     $<$<EQUAL:${QT_VERSION_MAJOR},5>:Qt5::WebSockets>
     $<$<EQUAL:${QT_VERSION_MAJOR},6>:websocketpp::websocketpp>
     Boost::headers
-    QtPiDeckCommon)
+    QtPiDeckCommon
+    QtDefinitions)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_definitions(QtPiDeckServerLib

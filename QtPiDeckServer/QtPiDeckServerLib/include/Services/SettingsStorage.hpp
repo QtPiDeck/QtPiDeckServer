@@ -4,7 +4,7 @@
 
 #include <QSettings>
 
-#include "QtPiDeckServerDefines.hpp"
+#include "QtPiDeckServerDefinitions.hpp"
 #include "Services/IServerSettingsStorage.hpp"
 
 namespace QtPiDeck::Services {
