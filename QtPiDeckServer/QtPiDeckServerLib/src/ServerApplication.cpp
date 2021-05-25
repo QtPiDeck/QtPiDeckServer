@@ -1,6 +1,7 @@
 #include "ServerApplication.hpp"
 
 #include <QCoreApplication>
+#include <QQuickStyle>
 
 #include "Services/MessageBus.hpp"
 #include "Services/ObsMessageIdGenerator.hpp"
@@ -10,9 +11,10 @@
 #else
 #include "Services/WebSocketQt.hpp"
 #endif
+#include "Network/Obs/ObsRequests.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
-#include "Network/Obs/ObsRequests.hpp"
+#include "QtDefinitions.hpp"
 
 static void initStaticResouces() {
   Q_INIT_RESOURCE(qml); // NOLINT
@@ -23,6 +25,14 @@ auto ServerApplication::mainPage() -> QUrl { return "qrc:/qml/pages/main.qml"_qu
 
 void ServerApplication::initialPreparations() {
   Application::initialPreparations();
+
+  // native windows style doesn't look pretty
+  // this will stay until custom style is created
+#if QT_VERSION_MAJOR == 6
+  if (QSysInfo::productType() == QtPlatform::windows) {
+    QQuickStyle::setStyle(QtStyle::Basic);
+  }
+#endif
 
   ioc().registerSingleton<Services::IMessageBus>(std::make_shared<Services::MessageBus>(nullptr));
   ioc().registerService<Services::IServerSettingsStorage, Services::SettingsStorage>();
