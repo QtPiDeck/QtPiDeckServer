@@ -4,7 +4,8 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 add_executable(QtPiDeckServerCodeTests 
                src/main.cpp
                src/Network/Obs/ObsWebsocketClientTests.cpp 
-               src/Services/ObsMessageIdGeneratorTests.cpp)
+               src/Services/ObsMessageIdGeneratorTests.cpp
+               src/Network/Obs/GetAuthRequiredResponseTests.cpp)
 add_test(NAME QtPiDeckServerCodeTests COMMAND QtPiDeckServerCodeTests)
 target_link_libraries(QtPiDeckServerCodeTests
     PRIVATE
@@ -23,6 +24,7 @@ if(VISUAL_STUDIO)
     add_custom_command(
         TARGET QtPiDeckServerCodeTests POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:QtPiDeckCommon>
         $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core>
         $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Qml>
         $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui>

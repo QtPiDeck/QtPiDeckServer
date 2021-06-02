@@ -14,7 +14,7 @@ template<class T>
 struct is_optional : std::false_type {};
 
 template<class T>
-struct is_optional<std::optional<T>> : std::false_type {};
+struct is_optional<std::optional<T>> : std::true_type {};
 
 template<class T>
 inline constexpr bool is_optional_v = is_optional<T>::value;
@@ -54,22 +54,20 @@ template<Field TField>
 template<class TField>
 #endif
 void setValue(TField& field, const QJsonObject& object, const QLatin1String& key) noexcept {
-  if (!object.contains(key)) {
-    if constexpr (is_optional_v<TField>) {
-      qWarning("no value for non-optional key '%s'", key); // NOLINT
+  if (const auto& value = object[key]; value.isUndefined() || value.isNull()) {
+    if constexpr (!is_optional_v<TField>) {
+      qWarning().nospace() << "no value for non-optional key " << key << " (" << typeid(TField).name() << ")"; // NOLINT
     }
-
-    return;
+  } else {
+    setValue(field, value);
   }
-
-  setValue(field, object[key]);
 }
 
 template<class TObsObj>
 struct [[nodiscard]] withJsonObject {
   explicit withJsonObject(const QJsonObject& jsonObject) noexcept : m_jsonObject(&jsonObject) {
-    setValue(m_obsObj.status, jsonObject, QLatin1String{"status"});
-    setValue(m_obsObj.error, jsonObject, QLatin1String{"error"});
+    setValue(m_obsObj.status, jsonObject, TObsObj::statusField);
+    setValue(m_obsObj.error, jsonObject, TObsObj::errorField);
     m_isOk = isRequestSuccessful(m_obsObj);
   }
 

@@ -15,11 +15,15 @@ struct GetAuthRequiredResponse : ObsResponseStatus {
   std::optional<QString> challenge{};
   std::optional<QString> salt{};
 
+  static const inline QLatin1String authRequiredField = "authRequired"_qls;
+  static const inline QLatin1String challengeField = "challenge"_qls;
+  static const inline QLatin1String saltField = "salt"_qls;
+
   static auto fromJson(QStringView json) noexcept -> GetAuthRequiredResponse {
     return withJsonObject<GetAuthRequiredResponse>(QJsonDocument::fromJson(json.toUtf8()).object())
-        .parse(&GetAuthRequiredResponse::authRequired, "authRequered"_qls)
-        .parse(&GetAuthRequiredResponse::challenge, "challenge"_qls)
-        .parse(&GetAuthRequiredResponse::salt, "salt"_qls)
+        .parse(&GetAuthRequiredResponse::authRequired, authRequiredField)
+        .parse(&GetAuthRequiredResponse::challenge, challengeField)
+        .parse(&GetAuthRequiredResponse::salt, saltField)
         .getResult();
   }
 };
