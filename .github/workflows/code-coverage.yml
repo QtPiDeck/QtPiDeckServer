@@ -55,14 +55,14 @@ jobs:
           sudo apt update
           sudo apt install
           sudo apt install vulkan-sdk libxkbcommon-dev -y
-        if: matrix.cfg.os == 'ubuntu-20.04' && matrix.cfg.qt == '6.1.0'
+        if: matrix.cfg.qt == '6.1.0'
 
-      - uses: lukka/run-vcpkg@v7.3
+      - uses: lukka/run-vcpkg@v6
         with:
-          vcpkgDirectory: ${{ github.workspace }}/ext/vcpkg
-          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-temp
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-tmp
           vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
-          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/ext/vcpkg-tripltets/
+          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg-tripltets/
           doNotUpdateVcpkg: true
         if: matrix.cfg.dependencies != null
 
