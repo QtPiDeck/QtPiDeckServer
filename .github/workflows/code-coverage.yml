@@ -100,3 +100,5 @@ jobs:
         run: lcov --remove coverage.txt -o coverage.txt '/usr/*' '*/Tests/*' '*/build/*' '*boost*' '*QtPiDeckCommon*'
 
       - uses: codecov/codecov-action@v1
+        with:
+          functionalities: "fix"
