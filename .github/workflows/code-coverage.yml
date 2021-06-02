@@ -80,7 +80,7 @@ jobs:
         run: sudo apt update && sudo apt install -y lcov
 
       - name: Initial lcov run
-        run: lcov --no-external --capture --initial --directory . --output-file before.txt
+        run: lcov --rc lcov_branch_coverage=1 --no-external --capture --initial --directory . --output-file before.txt
 
       - name: Test project
         run: ctest --output-on-failure
@@ -89,14 +89,16 @@ jobs:
           LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
 
       - name: Post-test lcov run
-        run: lcov --capture --directory . --output-file coverage.txt
+        run: lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.txt
 
       - name: Merge lcov reports
         run: |
-            lcov --add-tracefile before.txt --add-tracefile coverage.txt --output-file coverage.txt
+            lcov --rc lcov_branch_coverage=1 --add-tracefile before.txt --add-tracefile coverage.txt --output-file coverage.txt
             rm before.txt
 
       - name: Clean up report
-        run: lcov --remove coverage.txt -o coverage.txt '/usr/*' '*/Tests/*' '*/build/*' '*boost*' '*QtPiDeckCommon*'
+        run: lcov --rc lcov_branch_coverage=1 --remove coverage.txt -o coverage.txt '/usr/*' '*/Tests/*' '*/build/*' '*boost*' '*QtPiDeckCommon*'
 
       - uses: codecov/codecov-action@v1
+        with:
+          functionalities: "fix" 
