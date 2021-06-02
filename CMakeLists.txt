@@ -11,7 +11,13 @@ include(CTest)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+# qt 6.1.0 has a bug with source_location include with msvc(not sure about other compilers) in c++20 mode
+# downgrading to c++17 leads to a few problem resolved in code by checking qt version
+if (MSVC AND ${QT_VERSION_MAJOR} EQUAL 6 AND ${QT_VERSION_MINOR} EQUAL 1 AND ${QT_VERSION_PATCH} EQUAL 0)
+set(CMAKE_CXX_STANDARD 17)
+else()
 set(CMAKE_CXX_STANDARD 20)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(FLAGS_SET_BY_PARENT 1)

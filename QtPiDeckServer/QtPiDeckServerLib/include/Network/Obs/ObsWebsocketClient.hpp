@@ -5,12 +5,12 @@
 #include <unordered_map>
 
 #include <QAbstractSocket>
-#include <QLoggingCategory>
 #include <QDataStream>
+#include <QLoggingCategory>
 
 #include "Bus/ObsMessages.hpp"
-#include "ObsRequests.hpp"
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
+#include "ObsRequests.hpp"
 #include "Services/IMessageBus.hpp"
 #include "Services/IObsMessageIdGenerator.hpp"
 #include "Services/IServerSettingsStorage.hpp"
@@ -63,7 +63,11 @@ public:
 
   void connectToObs() noexcept;
 
+#if __cpp_concepts
   template<ObsRequest TRequest>
+#else
+  template<class TRequest>
+#endif
   void sendRequest(TRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
     sendRequest(static_cast<uint16_t>(requestId), callbackMessageId);
   }

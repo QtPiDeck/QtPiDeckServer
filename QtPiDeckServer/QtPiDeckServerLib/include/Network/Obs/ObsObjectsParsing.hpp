@@ -30,14 +30,16 @@ struct field_type<std::optional<T>> : field_type<T> {};
 template<class T>
 using field_type_t = typename field_type<T>::type;
 
-#if !defined(APPLE_CLANG)
+#if __cpp_concepts
 template<class T>
 concept CONCEPT_BOOL Field = std::is_same_v<field_type_t<T>, QString> || std::is_same_v<field_type_t<T>, bool>;
-#else
-#define Field class
 #endif
 
+#if __cpp_concepts
 template<Field TField>
+#else
+template<class TField>
+#endif
 void setValue(TField& field, const QJsonValue& value) noexcept {
   if constexpr (std::is_same_v<field_type_t<TField>, QString>) {
     field = value.toString();
@@ -46,7 +48,11 @@ void setValue(TField& field, const QJsonValue& value) noexcept {
   }
 }
 
+#if __cpp_concepts
 template<Field TField>
+#else
+template<class TField>
+#endif
 void setValue(TField& field, const QJsonObject& object, const QLatin1String& key) noexcept {
   if (!object.contains(key)) {
     if constexpr (is_optional_v<TField>) {

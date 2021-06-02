@@ -56,6 +56,11 @@ target_link_libraries(QtPiDeckServerLib
     QtPiDeckCommon
     QtDefinitions)
 
+if(CODECOV AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(QtPiDeckServerLib PUBLIC --coverage)
+    target_link_options(QtPiDeckServerLib PUBLIC --coverage)
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_definitions(QtPiDeckServerLib
         PUBLIC
