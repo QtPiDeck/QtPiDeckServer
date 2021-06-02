@@ -63,7 +63,13 @@ void DeckServer::processMessage(const QtPiDeck::Network::MessageHeader& header) 
     QByteArray payload;
     QDataStream qds{&payload, QIODevice::WriteOnly};
     qds << requestId;
-    service<Services::IMessageBus>()->sendMessage(Bus::Message{messageType, payload});
+    // see CMakeLists.txt
+#if QT_VERSION_CHECK(6, 1, 0) == QT_VERSION && _MSC_VER
+    ServiceUser<Services::IMessageBus>::service()
+#else
+    service<Services::IMessageBus>()
+#endif
+        ->sendMessage(Bus::Message{messageType, payload});
   };
   switch (header.messageType) {
   case QtPiDeck::Network::MessageType::Ping:
