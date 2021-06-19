@@ -106,15 +106,6 @@ jobs:
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
 
-      - uses: lukka/run-vcpkg@v6
-        with:
-          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-tmp2
-          vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
-          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }}
-          doNotUpdateVcpkg: true
-        if: matrix.cfg.dependencies != null
-
       - name: Run cmake
         run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
         working-directory: build
