@@ -1,5 +1,5 @@
 from vcpkg.depList import getCommonList
-from vcpkg.depList import getServerList
+from vcpkgServer.depList import getServerList
 import hashlib
 import sys
 
