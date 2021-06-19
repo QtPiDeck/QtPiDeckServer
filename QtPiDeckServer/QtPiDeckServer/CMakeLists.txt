@@ -11,3 +11,5 @@ target_link_libraries(QtPiDeckServer
 
 target_include_directories(QtPiDeckServer
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_warnings_flags(QtPiDeckServer)

@@ -8,28 +8,16 @@ mark_as_advanced(QT_QMAKE_EXECUTABLE)
 
 include(CTest)
 
+if(MSVC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.14)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /experimental:external /external:W0 ")
+    set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "/external:I ")
+endif()
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-# qt 6.1.0 has a bug with source_location include with msvc(not sure about other compilers) in c++20 mode
-# downgrading to c++17 leads to a few problem resolved in code by checking qt version
-if (MSVC AND ${QT_VERSION_MAJOR} EQUAL 6 AND ${QT_VERSION_MINOR} EQUAL 1 AND ${QT_VERSION_PATCH} EQUAL 0)
-set(CMAKE_CXX_STANDARD 17)
-else()
 set(CMAKE_CXX_STANDARD 20)
-endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(FLAGS_SET_BY_PARENT 1)
-if (MSVC)
-    # warning level 4 and all warnings as errors
-    # waiting for /external to be fixed
-    #add_compile_options(/W4 /WX)
-    add_compile_options(/WX)
-else()
-    # lots of warnings and all warnings as errors
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
-endif()
 
 # qt6 bindings
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
