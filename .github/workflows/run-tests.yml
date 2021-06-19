@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, dependencies: ["boost-test", "boost-log"], vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, dependencies: ["boost-test", "boost-log"], vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, cxx: g++-10, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-log"], vcpkgtriplet: x64-linux }
-        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, dependencies: ["boost-test", "boost-log"], vcpkgtriplet: x64-windows }
-        - { os: windows-latest, qt: 6.1.0, cc: cl, cxx: cl, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-log"], vcpkgtriplet: x64-windows }
-        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, dependencies: ["boost-test", "boost-log"], vcpkgtriplet: x64-osx }
-        - { os: macos-latest, qt: 6.1.0, cc: clang, cxx: clang++, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-log"], vcpkgtriplet: x64-osx }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, vcpkgtriplet: x64-windows }
+        - { os: windows-latest, qt: 6.1.0, cc: cl, cxx: cl, experimental: true, vcpkgtriplet: x64-windows }
+        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.1.0, cc: clang, cxx: clang++, experimental: true, vcpkgtriplet: x64-osx }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -66,6 +66,10 @@ jobs:
           sudo apt install vulkan-sdk libxkbcommon-dev -y
         if: matrix.cfg.os == 'ubuntu-20.04' && matrix.cfg.qt == '6.1.0'
 
+      - name: Install gcc 8
+        run: sudo apt-get install g++-8 -y
+        if: matrix.cfg.cc == 'gcc-8'
+
       - name: Cache Vulkan(windows)
         id: cache-vulkan
         uses: actions/cache@v1
@@ -85,6 +89,23 @@ jobs:
         run: echo "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VER_FULL}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         if: matrix.cfg.os == 'windows-latest' && matrix.cfg.qt == '6.1.0'
 
+      - name: Get vcpkg package list and cache key
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }})"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }})"
+        id: vcpkgPackages
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.vcpkgPackages.outputs.cacheKey }}
+          vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
+          vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+
       - uses: lukka/run-vcpkg@v6
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
@@ -99,7 +120,7 @@ jobs:
         working-directory: build
         env:
           CC: ${{ matrix.cfg.cc }}
-          #CXX: ${{ matrix.cfg.cxx }}
+          CXX: ${{ matrix.cfg.cxx }}
 
       - name: Build project
         run: ninja
