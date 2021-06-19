@@ -1,6 +1,13 @@
+#define BOOST_TEST_MODULE GetAuthRequiredResponseTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
+#include "Utilities/Logging.hpp"
+
+auto main(int argc, char* argv[]) -> int {
+  QtPiDeck::Utilities::initLogging("GetAuthRequiredResponseTests");
+  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
+}
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
   return operator<<(ostr, right.value_or("(nil)"_qs).toStdString());

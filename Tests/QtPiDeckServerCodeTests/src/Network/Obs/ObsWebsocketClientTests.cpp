@@ -1,6 +1,13 @@
+#define BOOST_TEST_MODULE ObsWebsocketClientTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/ObsWebsocketClient.hpp"
+#include "Utilities/Logging.hpp"
+
+auto main(int argc, char* argv[]) -> int {
+  QtPiDeck::Utilities::initLogging("ObsWebsocketClientTests");
+  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
+}
 
 CT_BOOST_AUTO_TEST_SUITE(ObsWebsocketClient)
 
@@ -27,17 +34,17 @@ private:
 class NoopMessageBus : public QtPiDeck::Services::IMessageBus {
 public:
   [[nodiscard]] auto subscribe(QObject* /*context*/,
-                               const std::function<void(const QtPiDeck::Bus::Message&)>& /*method*/)
-      -> QtPiDeck::Services::Subscription override {
+                               const std::function<void(const QtPiDeck::Bus::Message&)>& /*method*/) noexcept
+      -> QtPiDeck::Utilities::Connection override {
     return {};
   }
   [[nodiscard]] auto subscribe(QObject* /*context*/,
                                const std::function<void(const QtPiDeck::Bus::Message&)>& /*method*/,
-                               uint64_t /*messageType*/) -> QtPiDeck::Services::Subscription override {
+                               uint64_t /*messageType*/) noexcept -> QtPiDeck::Utilities::Connection override {
     return {};
   }
-  void unsubscribe(QtPiDeck::Services::Subscription& /*subscription*/) override {}
-  void sendMessage(QtPiDeck::Bus::Message /*message*/) override {}
+  void unsubscribe(QtPiDeck::Utilities::Connection& /*subscription*/) noexcept override {}
+  void sendMessage(QtPiDeck::Bus::Message /*message*/) noexcept override {}
 };
 
 CT_BOOST_AUTO_TEST_CASE(connectWithoutStorage) {
@@ -90,12 +97,12 @@ CT_BOOST_AUTO_TEST_CASE(connectWithStorage) {
 class SimpleMessageBus final : public NoopMessageBus {
 public:
   [[nodiscard]] auto subscribe(QObject* /*context*/, const std::function<void(const QtPiDeck::Bus::Message&)>& method,
-                               uint64_t /*messageType*/) -> QtPiDeck::Services::Subscription final {
+                               uint64_t /*messageType*/) noexcept -> QtPiDeck::Utilities::Connection final {
     m_call = method;
     return {};
   }
 
-  void sendMessage(QtPiDeck::Bus::Message mess) final { m_call(mess); }
+  void sendMessage(QtPiDeck::Bus::Message mess) noexcept final { m_call(mess); }
 
 private:
   std::function<void(const QtPiDeck::Bus::Message&)> m_call;
@@ -137,7 +144,7 @@ CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
   auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
   casted->connected();
   CT_BOOST_TEST(casted->message().contains(QLatin1String{QtPiDeck::Network::Obs::RequestTypesRaw[static_cast<uint16_t>(
-      QtPiDeck::Network::Obs::General::GetAuthReqired)]}));
+      QtPiDeck::Network::Obs::General::GetAuthReqired)]}));  
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

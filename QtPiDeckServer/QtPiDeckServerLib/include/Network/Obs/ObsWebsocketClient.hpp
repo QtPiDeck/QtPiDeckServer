@@ -86,7 +86,7 @@ private:
 
   std::optional<bool> m_authorized;
 
-  Services::Subscription m_authResponseReceived;
+  Utilities::Connection m_authResponseReceived;
 
   inline static const QString WebSocketProtocol{"ws://"};
   inline static const QString SecuredWebSocketProtocol{"wss://"};
