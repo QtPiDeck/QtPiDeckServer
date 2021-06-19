@@ -1,6 +1,13 @@
+#define BOOST_TEST_MODULE ObsMessageIdGeneratorTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Services/ObsMessageIdGenerator.hpp"
+#include "Utilities/Logging.hpp"
+
+auto main(int argc, char* argv[]) -> int {
+  QtPiDeck::Utilities::initLogging("ObsMessageIdGeneratorTests");
+  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
+}
 
 using namespace QtPiDeck::Services;
 

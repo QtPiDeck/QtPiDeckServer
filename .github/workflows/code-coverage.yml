@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, experimental: false, dependencies: ["boost-test"], vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, experimental: true, dependencies: ["boost-test", "websocketpp"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, experimental: false, dependencies: ["boost-test", "boost-log"], vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.1.0, cc: gcc-10, experimental: true, dependencies: ["boost-test", "websocketpp", "boost-log"], vcpkgtriplet: x64-linux }
 
     name: code coverage [Qt${{ matrix.cfg.qt }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -60,9 +60,9 @@ jobs:
       - uses: lukka/run-vcpkg@v6
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
-          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-tmp
+          appendedCacheKey: ${{ join(matrix.cfg.dependencies, '-') }}-tmp2
           vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
-          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }} --overlay-triplets=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg-tripltets/
+          vcpkgArguments: ${{ join(matrix.cfg.dependencies, ' ') }}
           doNotUpdateVcpkg: true
         if: matrix.cfg.dependencies != null
 
