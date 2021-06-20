@@ -1,0 +1,100 @@
+name: Clang tidy checks
+
+# currently does not check 100% of code
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.cfg.os }}
+    env:
+      VULKAN_VER: 1.2.162
+      VULKAN_VER_FULL: 1.2.162.0
+    strategy:
+      matrix:
+        cfg:
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: clang-11, cxx: clang++-11, experimental: false, vcpkgtriplet: x64-linux }
+
+    name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
+    continue-on-error: ${{ matrix.cfg.experimental }}
+
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-qt-${{ matrix.cfg.qt }}
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          submodules: 'true'
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '${{ matrix.cfg.qt }}'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - name: Make build dir
+        run: mkdir build
+       
+      - name: Get vcpkg package list and cache key
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }})"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }})"
+        id: vcpkgPackages
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.vcpkgPackages.outputs.cacheKey }}
+          vcpkgTriplet: ${{ matrix.cfg.vcpkgtriplet }}
+          vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+
+      - run: sudo apt-get install -y clang-tidy-11 clang-11
+
+      - name: Run cmake
+        run: cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        working-directory: build
+        env:
+          CC: ${{ matrix.cfg.cc }}
+          CXX: ${{ matrix.cfg.cxx }}
+
+      - name: Build project
+        run: ninja
+        working-directory: build
+
+      - name: Prepare reports directory
+        run: mkdir clang-tidy-reports
+
+      - name: Generate reports
+        run: git diff --name-only $(git merge-base origin/master HEAD) HEAD | grep '\.cpp$' | xargs -P2 -I% bash -c 'v=%; [ -f % ] && clang-tidy-11 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
+
+      - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
+
+      - run: echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
+        id: reports-number
+
+      - name: Export report
+        uses: actions/upload-artifact@v2
+        with:
+          name: clang-tidy-reports
+          path: clang-tidy-reports
+        if: steps.reports-number.outputs.count != 0
+
+      - name: Fail if clang-tidy found something
+        if: ${{ steps.reports-number.outputs.count != 0 }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('clang-tidy detected errors. Check job artifacts')
