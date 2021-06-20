@@ -65,7 +65,7 @@ void setValue(TField& field, const QJsonObject& object, const QLatin1String& key
 
 template<class TObsObj>
 struct [[nodiscard]] withJsonObject {
-  explicit withJsonObject(const QJsonObject& jsonObject) noexcept : m_jsonObject(&jsonObject), m_ok(false) {
+  explicit withJsonObject(const QJsonObject& jsonObject) noexcept : m_jsonObject(&jsonObject), m_isOk(false) {
     setValue(m_obsObj.status, jsonObject, TObsObj::statusField);
     setValue(m_obsObj.error, jsonObject, TObsObj::errorField);
     m_isOk = isRequestSuccessful(m_obsObj);
