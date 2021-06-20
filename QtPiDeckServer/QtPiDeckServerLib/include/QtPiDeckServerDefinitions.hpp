@@ -11,7 +11,3 @@
 #define CONCEPT_BOOL bool
 #endif
 #endif
-
-inline auto operator"" _qs(const char* str, size_t /*unused*/) -> QString { return QString{str}; }
-inline auto operator"" _qls(const char* str, size_t /*unused*/) -> QLatin1String { return QLatin1String{str}; }
-inline auto operator"" _qurl(const char* str, size_t /*unused*/) -> QUrl { return QUrl{QLatin1String{str}}; }

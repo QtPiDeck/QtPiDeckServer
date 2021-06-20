@@ -12,6 +12,7 @@
 #include "Services/WebSocketQt.hpp"
 #endif
 #include "Network/Obs/ObsRequests.hpp"
+#include "Utilities/Literals.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
 #include "QtDefinitions.hpp"
@@ -21,7 +22,10 @@ static void initStaticResouces() {
 }
 
 namespace QtPiDeck {
-auto ServerApplication::mainPage() -> QUrl { return "qrc:/qml/pages/main.qml"_qurl; }
+auto ServerApplication::mainPage() -> QUrl {
+  using namespace QtPiDeck::Utilities::literals;
+  return "qrc:/qml/pages/main.qml"_qurl;
+}
 
 void ServerApplication::initialPreparations() {
   Application::initialPreparations();
@@ -59,6 +63,7 @@ void ServerApplication::engineCreated(QQmlApplicationEngine& engine) {
   QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, // clazy:exclude=connect-non-signal
                    m_deckServer.get(), &Network::DeckServer::start);
 
+  using namespace QtPiDeck::Utilities::literals;
   engine.addImportPath("qrc:/qml/components"_qs);
 
   ViewModels::SettingsViewModel::registerType();
