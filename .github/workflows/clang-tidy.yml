@@ -64,7 +64,7 @@ jobs:
       - run: sudo apt-get install -y clang-tidy-11 clang-11
 
       - name: Run cmake
-        run: cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        run: cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         working-directory: build
         env:
           CC: ${{ matrix.cfg.cc }}
