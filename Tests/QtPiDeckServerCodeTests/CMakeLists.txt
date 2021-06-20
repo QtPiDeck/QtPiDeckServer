@@ -16,6 +16,7 @@ endfunction()
 add_server_cpp_test(ObsMessageIdGeneratorTests src/Services/ObsMessageIdGeneratorTests.cpp)
 add_server_cpp_test(ObsWebsocketClientTests src/Network/Obs/ObsWebsocketClientTests.cpp)
 add_server_cpp_test(GetAuthRequiredResponseTests src/Network/Obs/GetAuthRequiredResponseTests.cpp)
+add_server_cpp_test(ObsObjectsParsingTests src/Network/Obs/ObsObjectsParsingTests.cpp)
 
 # visual studio test manager requires to have these libs in PATH
 # so we just copy required libs to test binary
