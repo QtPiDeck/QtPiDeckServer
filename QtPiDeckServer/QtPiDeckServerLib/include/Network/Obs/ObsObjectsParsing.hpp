@@ -71,7 +71,7 @@ struct [[nodiscard]] withJsonObject {
     m_isOk = isRequestSuccessful(m_obsObj);
   }
 
-  explicit withJsonObject(QStringView json) noexcept
+  explicit withJsonObject(QStringView json) noexcept // NOLINT(cppcoreguidelines-pro-type-member-init)
       : withJsonObject(QJsonDocument::fromJson(json.toUtf8()).object()) {}
 
   template<class TField>
