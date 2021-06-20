@@ -6,6 +6,7 @@
 
 #include "QtPiDeckServerDefinitions.hpp"
 #include "Services/IServerSettingsStorage.hpp"
+#include "Utilities/Literals.hpp"
 
 namespace QtPiDeck::Services {
 template<class TVal>
@@ -16,6 +17,8 @@ struct FieldData {
 
 template<class TVal>
 FieldData(QString b, TVal e) -> FieldData<TVal>;
+
+using namespace QtPiDeck::Utilities::literals;
 
 class SettingsStorage final : public IServerSettingsStorage {
 public:

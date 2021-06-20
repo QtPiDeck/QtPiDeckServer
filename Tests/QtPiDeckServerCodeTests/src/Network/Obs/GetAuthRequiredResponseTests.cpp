@@ -3,6 +3,7 @@
 
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
 #include "Utilities/Logging.hpp"
+#include "Utilities/Literals.hpp"
 
 auto main(int argc, char* argv[]) -> int {
   QtPiDeck::Utilities::initLogging("GetAuthRequiredResponseTests");
@@ -10,6 +11,7 @@ auto main(int argc, char* argv[]) -> int {
 }
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
+  using namespace QtPiDeck::Utilities::literals;
   return operator<<(ostr, right.value_or("(nil)"_qs).toStdString());
 }
 
@@ -18,6 +20,7 @@ CT_BOOST_AUTO_TEST_SUITE(GetAuthRequiredResponseTests)
 using namespace QtPiDeck::Network::Obs;
 
 CT_BOOST_AUTO_TEST_CASE(GetAuthRequiredResponseShouldBeParsedFromJson) {
+  using namespace QtPiDeck::Utilities::literals;
   const auto challengeString = "12345"_qs;
   const auto json = [&challengeString]() {
     QJsonObject obj;

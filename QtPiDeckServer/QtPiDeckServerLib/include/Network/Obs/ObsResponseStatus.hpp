@@ -5,8 +5,10 @@
 #include <QString>
 
 #include "ObsRequests.hpp"
+#include "Utilities/Literals.hpp"
 
 namespace QtPiDeck::Network::Obs {
+using namespace QtPiDeck::Utilities::literals;
 struct ObsResponseStatus {
     QString status{};
     std::optional<QString> error{};
