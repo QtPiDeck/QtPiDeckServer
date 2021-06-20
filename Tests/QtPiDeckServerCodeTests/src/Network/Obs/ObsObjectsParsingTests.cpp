@@ -15,7 +15,6 @@ namespace std {
 auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::ostream& {
   return operator<<(ostr, right.has_value() ? static_cast<int8_t>(right.value()) : int8_t{-1});
 }
-}
 
 template<class T>
 auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> bool {
@@ -24,7 +23,7 @@ auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> 
   }
 
   return left.has_value() == right.has_value();
-         
+}
 }
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
