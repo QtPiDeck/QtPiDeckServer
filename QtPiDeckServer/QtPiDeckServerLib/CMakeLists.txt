@@ -15,6 +15,7 @@ add_library(QtPiDeckServerLib STATIC
     src/ServerApplication.cpp
     src/Network/DeckServer.cpp
     src/Network/Obs/ObsWebsocketClient.cpp
+    src/Network/Obs/ObsObjectsParsing.cpp
     src/Services/SettingsStorage.cpp
     $<$<EQUAL:${QT_VERSION_MAJOR},5>:src/Services/WebSocketQt.cpp>
     $<$<EQUAL:${QT_VERSION_MAJOR},6>:src/Services/WebSocketpp.cpp>

@@ -63,13 +63,9 @@ public:
 
   void connectToObs() noexcept;
 
-#if __cpp_concepts
-  template<ObsRequest TRequest>
-#else
-  template<class TRequest>
-#endif
-  void sendRequest(TRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
-    sendRequest(static_cast<uint16_t>(requestId), callbackMessageId);
+  void sendRequest(ObsRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
+    sendRequest(std::visit([](auto&& arg) -> uint16_t { return static_cast<uint16_t>(arg); }, requestId),
+                callbackMessageId);
   }
 
   void sendRequest(uint16_t requestId, Bus::ObsMessages callbackMessageId) noexcept;

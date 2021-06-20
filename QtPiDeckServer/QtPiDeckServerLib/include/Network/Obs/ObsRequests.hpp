@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <variant>
 
 #include <QJsonObject>
 #include <QString>
@@ -12,11 +13,7 @@
 namespace QtPiDeck::Network::Obs {
 enum class General : uint16_t { GetAuthReqired, End };
 enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
-
-#if __cpp_concepts
-template<class T>
-concept CONCEPT_BOOL ObsRequest = std::is_same_v<T, General> || std::is_same_v<T, MediaControl>;
-#endif
+using ObsRequest = std::variant<General, MediaControl>;
 
 inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 
