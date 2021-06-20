@@ -17,6 +17,16 @@ auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::os
 }
 }
 
+template<class T>
+auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> bool {
+  if (left.has_value() && right.has_value()) {
+    return left.value() == right.value();
+  }
+
+  return left.has_value() == right.has_value();
+         
+}
+
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
   using namespace QtPiDeck::Utilities::literals;
   return operator<<(ostr, right.value_or("(nil)"_qs).toStdString());
@@ -47,6 +57,7 @@ CT_BOOST_AUTO_TEST_CASE(ObjectSpecificFieldShouldBeSkippedIfErrorOccured) {
   CT_BOOST_TEST(objWithBasicParsing.error == objWithFullParsing.error);
   CT_BOOST_TEST(objWithBasicParsing.error == errorStr);
   CT_BOOST_TEST(objWithBasicParsing.status == objWithFullParsing.status);
+  CT_BOOST_TEST(!objWithBasicParsing.importantValue.has_value());
   CT_BOOST_TEST(objWithBasicParsing.importantValue == objWithFullParsing.importantValue);
 }
 
