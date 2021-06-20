@@ -26,7 +26,7 @@ auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
   if constexpr (is_optional_v<T>) {
     if (!hasValue) {
       BOOST_LOG_STREAM_WITH_PARAMS(lg, (boost::log::keywords::severity = Utilities::severity::warning))
-          << "no value for non-optional key " << key.data() << " (" << typeid(T::value_type).name() << ")";
+          << "no value for non-optional key " << key.data() << " (" << typeid(typename T::value_type).name() << ")";
     }
   }
 
