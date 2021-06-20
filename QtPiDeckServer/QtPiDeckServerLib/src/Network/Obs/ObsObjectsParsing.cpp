@@ -7,7 +7,7 @@
 #include "Utilities/Logging.hpp"
 
 namespace QtPiDeck::Network::Obs {
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(obs_parser_logger, boost::log::sources::logger_mt);
+BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(obs_parser_logger, boost::log::sources::logger_mt) // NOLINT
 
 namespace {
 template<class T>
