@@ -17,13 +17,19 @@ auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::os
 }
 
 template<class T>
+auto operator==(const T& left,
+                const boost::test_tools::assertion::value_expr<const std::optional<T>&>& right) -> bool {
+  return right.value().has_value() && left == right.value().value();
+}
+
+/* template<class T>
 auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> bool {
   if (left.has_value() && right.has_value()) {
     return left.value() == right.value();
   }
 
   return left.has_value() == right.has_value();
-}
+}*/
 }
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
