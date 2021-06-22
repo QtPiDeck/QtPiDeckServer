@@ -2,7 +2,11 @@
 
 #include <array>
 #include <cstdint>
+#if defined(RANGESV3)
+#include <range/v3/algorithm/transform.hpp>
+#else 
 #include <algorithm>
+#endif
 #include <variant>
 
 #include <QString>
@@ -17,7 +21,10 @@ inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 namespace detail {
 inline auto typesRawToQString() noexcept {
   std::array<QString, RequestTypesRaw.size()> ret;
-  std::ranges::transform(RequestTypesRaw, std::begin(ret), [](const char* text) { return QString(text); });
+#if !defined(RANGESV3)
+  namespace ranges = std::ranges;
+#endif
+  ranges::transform(RequestTypesRaw, std::begin(ret), [](const char* text) { return QString(text); });
   return ret;
 }
 }

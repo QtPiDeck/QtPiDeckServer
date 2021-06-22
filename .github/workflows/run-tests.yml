@@ -20,8 +20,8 @@ jobs:
         - { os: ubuntu-20.04, qt: 6.1.1, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
         - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, vcpkgtriplet: x64-windows }
         - { os: windows-latest, qt: 6.1.1, cc: cl, cxx: cl, experimental: true, vcpkgtriplet: x64-windows }
-        - { os: macos-latest, qt: 5.15.2, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, experimental: false, vcpkgtriplet: x64-osx }
-        - { os: macos-latest, qt: 6.1.1, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, experimental: true, vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 5.15.2, cc: clang, cxx: clang++, experimental: false, vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.1.1, cc: clang, cxx: clang++, experimental: true, vcpkgtriplet: x64-osx }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
@@ -69,12 +69,6 @@ jobs:
         run: sudo apt-get install g++-8 -y
         if: matrix.cfg.cc == 'gcc-8'
 
-      - name: Update clang
-        run: |
-          brew update
-          brew upgrade llvm
-        if: matrix.cfg.os == 'macos-latest'
-
       - name: Cache Vulkan(windows)
         id: cache-vulkan
         uses: actions/cache@v1
@@ -96,8 +90,8 @@ jobs:
 
       - name: Get vcpkg package list and cache key
         run: |
-          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }})"
-          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }})"
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }} ${{ matrix.cfg.os }})"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }} ${{ matrix.cfg.os }})"
         id: vcpkgPackages
         env:
           PYTHONPATH: ./QtPiDeckCommon/scripts/

@@ -46,8 +46,8 @@ jobs:
        
       - name: Get vcpkg package list and cache key
         run: |
-          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }})"
-          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }})"
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.cfg.qt }} ${{ matrix.cfg.os }})"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.cfg.qt }} ${{ matrix.cfg.os }})"
         id: vcpkgPackages
         env:
           PYTHONPATH: ./QtPiDeckCommon/scripts/
@@ -78,7 +78,7 @@ jobs:
         run: mkdir clang-tidy-reports
 
       - name: Generate reports
-        run: git diff --name-only $(git merge-base origin/master HEAD) HEAD | grep '\.cpp$' | xargs -P2 -I% bash -c 'v=%; [ -f % ] && clang-tidy-11 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
+        run: git diff --name-only $(git merge-base origin/master HEAD) HEAD | grep '\.cpp$' | grep -v 'try_compile' | xargs -P2 -I% bash -c 'v=%; [ -f % ] && clang-tidy-11 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
 
       - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
 
