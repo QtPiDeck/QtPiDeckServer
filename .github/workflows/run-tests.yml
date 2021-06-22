@@ -16,14 +16,14 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.1, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
-        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, vcpkgtriplet: x64-windows }
-        - { os: windows-latest, qt: 6.1.1, cc: cl, cxx: cl, experimental: true, vcpkgtriplet: x64-windows }
-        - { os: macos-latest, qt: 5.15.2, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, experimental: false, vcpkgtriplet: x64-osx }
-        - { os: macos-latest, qt: 6.1.1, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, experimental: true, vcpkgtriplet: x64-osx }
+        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, ccname: gcc-10, experimental: false, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.1.1, cc: gcc-10, cxx: g++-10, ccname: gcc-10, experimental: true, vcpkgtriplet: x64-linux }
+        - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, ccname: cl, experimental: false, vcpkgtriplet: x64-windows }
+        - { os: windows-latest, qt: 6.1.1, cc: cl, cxx: cl, ccname: cl, experimental: true, vcpkgtriplet: x64-windows }
+        - { os: macos-latest, qt: 5.15.2, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, ccname: clang, experimental: false, vcpkgtriplet: x64-osx }
+        - { os: macos-latest, qt: 6.1.1, cc: /usr/local/opt/llvm/bin/clang, cxx: /usr/local/opt/llvm/bin/clang++, ccname: clang, experimental: true, vcpkgtriplet: x64-osx }
 
-    name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
+    name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.ccname }}[${{ matrix.cfg.os }}]
     continue-on-error: ${{ matrix.cfg.experimental }}
 
     steps:
