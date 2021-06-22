@@ -15,21 +15,6 @@ namespace std {
 auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::ostream& {
   return operator<<(ostr, right.has_value() ? static_cast<int8_t>(right.value()) : int8_t{-1});
 }
-
-/* template<class T>
-auto operator==(const T& left,
-                const boost::test_tools::assertion::value_expr<const std::optional<T>&>& right) -> bool {
-  return right.value().has_value() && left == right.value().value();
-}*/
-
-/* template<class T>
-auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> bool {
-  if (left.has_value() && right.has_value()) {
-    return left.value() == right.value();
-  }
-
-  return left.has_value() == right.has_value();
-}*/
 }
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
@@ -59,11 +44,11 @@ CT_BOOST_AUTO_TEST_CASE(ObjectSpecificFieldShouldBeSkippedIfErrorOccured) {
   auto parser = QtPiDeck::Network::Obs::withJsonObject<TestObject>(json);
   const auto objWithBasicParsing = parser.getResult();
   const auto objWithFullParsing = parser.parse(&TestObject::importantValue, valueKey).getResult();
-  CT_BOOST_TEST(objWithBasicParsing.error == objWithFullParsing.error);
-  CT_BOOST_TEST(objWithBasicParsing.error == errorStr);
+  CT_BOOST_TEST(*objWithBasicParsing.error == *objWithFullParsing.error);
+  CT_BOOST_TEST(*objWithBasicParsing.error == errorStr);
   CT_BOOST_TEST(objWithBasicParsing.status == objWithFullParsing.status);
   CT_BOOST_TEST(!objWithBasicParsing.importantValue.has_value());
-  CT_BOOST_TEST(objWithBasicParsing.importantValue == objWithFullParsing.importantValue);
+  CT_BOOST_TEST(!objWithFullParsing.importantValue.has_value());
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()
