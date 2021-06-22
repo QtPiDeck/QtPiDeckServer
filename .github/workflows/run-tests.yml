@@ -16,7 +16,6 @@ jobs:
     strategy:
       matrix:
         cfg:
-        - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-8, cxx: g++-8, experimental: false, vcpkgtriplet: x64-linux }
         - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, vcpkgtriplet: x64-linux }
         - { os: ubuntu-20.04, qt: 6.1.1, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
         - { os: windows-latest, qt: 5.15.2, cc: cl, cxx: cl, experimental: false, vcpkgtriplet: x64-windows }
