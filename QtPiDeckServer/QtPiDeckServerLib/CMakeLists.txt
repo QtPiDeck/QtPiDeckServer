@@ -72,8 +72,8 @@ endif()
 
 if(NOT CXX20RANGES)
     find_package(range-v3 CONFIG REQUIRED)
-    target_link_libraries(QtPiDeckServerLib PRIVATE range-v3 range-v3-meta range-v3::meta range-v3-concepts)
-    target_compile_definitions(QtPiDeckServerLib PRIVATE RANGESV3)
+    target_link_libraries(QtPiDeckServerLib PUBLIC range-v3 range-v3-meta range-v3::meta range-v3-concepts)
+    target_compile_definitions(QtPiDeckServerLib PUBLIC RANGESV3)
 endif()
 
 get_target_property(QtPiDeckCommon_SOURCE_DIR QtPiDeckCommon SOURCE_DIR)
