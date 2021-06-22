@@ -16,11 +16,11 @@ auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::os
   return operator<<(ostr, right.has_value() ? static_cast<int8_t>(right.value()) : int8_t{-1});
 }
 
-template<class T>
+/* template<class T>
 auto operator==(const T& left,
                 const boost::test_tools::assertion::value_expr<const std::optional<T>&>& right) -> bool {
   return right.value().has_value() && left == right.value().value();
-}
+}*/
 
 /* template<class T>
 auto operator==(const std::optional<T>& left, const std::optional<T>& right) -> bool {
