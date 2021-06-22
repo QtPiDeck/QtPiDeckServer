@@ -2,7 +2,7 @@
 
 #include <array>
 #include <cstdint>
-#include <ranges>
+#include <algorithm>
 #include <variant>
 
 #include <QString>
