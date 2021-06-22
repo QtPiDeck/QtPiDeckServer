@@ -27,10 +27,10 @@ endif()
 message(STATUS "Performing Test HAVE_CXX20RANGES")
 try_compile(CXX20RANGES ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/try_compile/ranges.cpp)
 if (CXX20RANGES)
-message(STATUS "Performing Test HAVE_CXX20RANGES - Success")
+    message(STATUS "Performing Test HAVE_CXX20RANGES - Success")
 else()
-message(STATUS "Performing Test HAVE_CXX20RANGES - Fail")
-message(STATUS "range-v3 will be used")
+    message(STATUS "Performing Test HAVE_CXX20RANGES - Fail")
+    message(STATUS "range-v3 will be used")
 endif()
 
 # concepts
