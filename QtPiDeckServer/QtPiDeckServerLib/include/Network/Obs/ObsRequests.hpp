@@ -2,13 +2,14 @@
 
 #include <array>
 #include <cstdint>
-#include <optional>
+#if defined(RANGESV3)
+#include <range/v3/algorithm/transform.hpp>
+#else 
+#include <algorithm>
+#endif
 #include <variant>
 
-#include <QJsonObject>
 #include <QString>
-
-#include "QtPiDeckServerDefinitions.hpp"
 
 namespace QtPiDeck::Network::Obs {
 enum class General : uint16_t { GetAuthReqired, End };
@@ -18,10 +19,12 @@ using ObsRequest = std::variant<General, MediaControl>;
 inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 
 namespace detail {
-inline auto typesRawToQString() {
+inline auto typesRawToQString() noexcept {
   std::array<QString, RequestTypesRaw.size()> ret;
-  std::transform(std::begin(RequestTypesRaw), std::end(RequestTypesRaw), std::begin(ret),
-                 [](const char* text) { return QString(text); });
+#if !defined(RANGESV3)
+  namespace ranges = std::ranges;
+#endif
+  ranges::transform(RequestTypesRaw, std::begin(ret), [](const char* text) { return QString(text); });
   return ret;
 }
 }
