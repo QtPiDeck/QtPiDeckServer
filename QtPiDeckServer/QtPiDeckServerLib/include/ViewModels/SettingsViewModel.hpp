@@ -3,8 +3,6 @@
 #include <QDebug>
 #include <QObject>
 
-#include "QtBinding.hpp"
-
 #include <boost/log/attributes/constant.hpp>
 #include <boost/log/trivial.hpp>
 
@@ -46,10 +44,12 @@ public:
 
   Q_INVOKABLE void saveSettings() noexcept;
 
-  BINDABLE(QString, bindableDeckServerAddress, m_deckServerAddress)
-  BINDABLE(QString, bindableDeckServerPort, m_deckServerPort)
-  BINDABLE(QString, bindableObsWebsocketAddress, m_obsWebsocketAddress)
-  BINDABLE(QString, bindableObsWebsocketPort, m_obsWebsocketPort)
+#if QT_VERSION_MAJOR == 6
+  auto bindableDeckServerAddress() -> QBindable<QString> { return &m_deckServerAddress; }
+  auto bindableDeckServerPort() -> QBindable<QString> { return &m_deckServerPort; }
+  auto bindableObsWebsocketAddress() -> QBindable<QString> { return &m_obsWebsocketAddress; }
+  auto bindableObsWebsocketPort() -> QBindable<QString> { return &m_obsWebsocketPort; }
+#endif
 
   static void registerType();
 
@@ -60,6 +60,7 @@ signals:
   void obsWebsocketPortChanged();
 
 private:
+#if QT_VERSION_MAJOR == 6
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerAddress,
                              &SettingsViewModel::deckServerAddressChanged)
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort, &SettingsViewModel::deckServerPortChanged)
@@ -67,6 +68,12 @@ private:
                              &SettingsViewModel::obsWebsocketAddressChanged)
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketPort,
                              &SettingsViewModel::obsWebsocketPortChanged)
+#else
+  QString m_deckServerAddress;
+  QString m_deckServerPort;
+  QString m_obsWebsocketAddress;
+  QString m_obsWebsocketPort;
+#endif
 
   mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;
 };
