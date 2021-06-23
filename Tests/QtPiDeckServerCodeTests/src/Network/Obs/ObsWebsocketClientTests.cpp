@@ -60,22 +60,25 @@ CT_BOOST_AUTO_TEST_CASE(connectWithoutStorage) {
 }
 
 class NoopServerSettingsStorage : public QtPiDeck::Services::IServerSettingsStorage {
-  auto read(const QString& /*key*/, const QVariant& /*defaultValue*/) const noexcept -> QVariant override { return {}; }
+  [[nodiscard]] auto read(const QString& /*key*/, const QVariant& /*defaultValue*/) const noexcept
+      -> QVariant override {
+    return {};
+  }
   void store(const QString& /*key*/, const QVariant& /*value*/) noexcept override {}
-  auto deckServerAddress() const noexcept -> QString override { return {}; }
+  [[nodiscard]] auto deckServerAddress() const noexcept -> QString override { return {}; }
   void setDeckServerAddress(const QString& /*deckServerAddress*/) noexcept override {}
-  auto deckServerPort() const noexcept -> QString override { return {}; }
+  [[nodiscard]] auto deckServerPort() const noexcept -> QString override { return {}; }
   void setDeckServerPort(const QString& /*deckServerPort*/) noexcept override {}
-  auto obsWebsocketAddress() const noexcept -> QString override { return {}; }
+  [[nodiscard]] auto obsWebsocketAddress() const noexcept -> QString override { return {}; }
   void setObsWebsocketAddress(const QString& /*obsWebsocketAddress*/) noexcept override {}
-  auto obsWebsocketPort() const noexcept -> QString override { return {}; }
+  [[nodiscard]] auto obsWebsocketPort() const noexcept -> QString override { return {}; }
   void setObsWebsocketPort(const QString& /*obsWebsocketPort*/) noexcept override {}
 };
 
 class ServerSettingsStorage final : public NoopServerSettingsStorage {
 public:
-  auto obsWebsocketAddress() const noexcept -> QString final { return Address; }
-  auto obsWebsocketPort() const noexcept -> QString final { return Port; }
+  [[nodiscard]] auto obsWebsocketAddress() const noexcept -> QString final { return Address; }
+  [[nodiscard]] auto obsWebsocketPort() const noexcept -> QString final { return Port; }
 
   inline static const QString Address = "thishost";
   inline static const QString Port = "12345";
@@ -118,7 +121,7 @@ public:
     return {};
   }
   void connected() { m_handler(); }
-  auto message() const -> QLatin1String { return m_message; }
+  [[nodiscard]] auto message() const -> QLatin1String { return m_message; }
 
 private:
   ConnectedHandler m_handler;
@@ -128,9 +131,9 @@ private:
 
 class NoopObsMessageIdGenerator final : public QtPiDeck::Services::IObsMessageIdGenerator {
 public:
-  auto generateId() const noexcept -> QString final { return {}; }
+  [[nodiscard]] auto generateId() const noexcept -> QString final { return {}; }
 
-  auto generateId(const QString& /*requestName*/) const noexcept -> QString final { return {}; }
+  [[nodiscard]] auto generateId(const QString& /*requestName*/) const noexcept -> QString final { return {}; }
 };
 
 CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
@@ -144,7 +147,7 @@ CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
   auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
   casted->connected();
   CT_BOOST_TEST(casted->message().contains(QLatin1String{QtPiDeck::Network::Obs::RequestTypesRaw[static_cast<uint16_t>(
-      QtPiDeck::Network::Obs::General::GetAuthReqired)]}));  
+      QtPiDeck::Network::Obs::General::GetAuthReqired)]}));
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

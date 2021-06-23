@@ -6,7 +6,9 @@
 
 #include <QAbstractSocket>
 #include <QDataStream>
-#include <QLoggingCategory>
+
+#include <boost/log/attributes/constant.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "Bus/ObsMessages.hpp"
 #include "Network/Obs/GetAuthRequiredResponse.hpp"
@@ -16,8 +18,7 @@
 #include "Services/IServerSettingsStorage.hpp"
 #include "Services/IWebSocket.hpp"
 #include "Services/UseServices.hpp"
-
-Q_DECLARE_LOGGING_CATEGORY(ObsWebsocket) // NOLINT
+#include "Utilities/Logging.hpp"
 
 namespace QtPiDeck::Network::Obs {
 class ObsWebsocketClient : public QObject,
@@ -26,48 +27,16 @@ class ObsWebsocketClient : public QObject,
   Q_OBJECT // NOLINT
 
 public:
-  template<class... TServices>
-  ObsWebsocketClient(const std::shared_ptr<TServices>&... services) noexcept {
-    (setService<TServices>(services), ...);
-    constexpr size_t numberOfServices = 4;
-    static_assert(sizeof...(TServices) == numberOfServices);
-    auto& webSocket = service<Services::IWebSocket>();
-    webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
-    webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
-    webSocket->setFailHandler([this](Services::IWebSocket::ConnectionError error) {
-      constexpr std::array errors = {QAbstractSocket::SocketError::ConnectionRefusedError,
-                                     QAbstractSocket::SocketError::UnknownSocketError};
-      webSocketError(errors.at(static_cast<uint32_t>(error)));
-    });
-
-    m_authResponseReceived = service<Services::IMessageBus>()->subscribe(
-        this,
-        [this](const Bus::Message& message) noexcept {
-          const auto obj = GetAuthRequiredResponse::fromJson([&message]() noexcept {
-            QDataStream qbs{message.payload};
-            QString jsonText;
-            qbs >> jsonText;
-            return jsonText;
-          }());
-
-          if (!isRequestSuccessful(obj)) {
-            qWarning() << "Failed to check authorization(%1)"_qls.arg(*obj.error);
-            m_authorized = false;
-            return;
-          }
-
-          m_authorized = !obj.authRequired;
-        },
-        Bus::ObsMessages::GetAuthRequiredResponseReceived);
-  }
+  ObsWebsocketClient(const std::shared_ptr<Services::IMessageBus>& messageBusService,
+                     const std::shared_ptr<Services::IServerSettingsStorage>& serviceSettingsStorageService,
+                     const std::shared_ptr<Services::IObsMessageIdGenerator>& obsMessageIdGeneratorService,
+                     const std::shared_ptr<Services::IWebSocket>& webSocketService) noexcept;
 
   void connectToObs() noexcept;
-
   void sendRequest(ObsRequest requestId, Bus::ObsMessages callbackMessageId) noexcept {
     sendRequest(std::visit([](auto&& arg) -> uint16_t { return static_cast<uint16_t>(arg); }, requestId),
                 callbackMessageId);
   }
-
   void sendRequest(uint16_t requestId, Bus::ObsMessages callbackMessageId) noexcept;
 
 public slots: // NOLINT(readability-redundant-access-specifiers)
@@ -78,11 +47,12 @@ public slots: // NOLINT(readability-redundant-access-specifiers)
 private:
   void send(uint16_t requestId, const QString& messageId, Bus::ObsMessages callbackMessageId) noexcept;
 
-  std::unordered_map<QString, Bus::ObsMessages> m_pendingResponses;
+  std::unordered_map<QString, Bus::ObsMessages> m_pendingResponses{};
 
   std::optional<bool> m_authorized;
 
   Utilities::Connection m_authResponseReceived;
+  mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;
 
   inline static const QString WebSocketProtocol{"ws://"};
   inline static const QString SecuredWebSocketProtocol{"wss://"};
