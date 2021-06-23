@@ -21,8 +21,13 @@ ObsWebsocketClient::ObsWebsocketClient(
   setService(obsMessageIdGeneratorService);
   setService(webSocketService);
   auto& webSocket = service<Services::IWebSocket>();
+#if defined(__cpp_lib_bind_front)
   webSocket->setTextReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedTestMessage, this));
   webSocket->setConnectedHandler(std::bind_front(&ObsWebsocketClient::checkAuthRequirement, this));
+#else
+  webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
+  webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
+#endif
   webSocket->setFailHandler([this](Services::IWebSocket::ConnectionError error) {
     constexpr std::array errors = {QAbstractSocket::SocketError::ConnectionRefusedError,
                                    QAbstractSocket::SocketError::UnknownSocketError};
