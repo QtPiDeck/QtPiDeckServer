@@ -9,9 +9,52 @@
 
 #include <QMetaEnum>
 
-Q_LOGGING_CATEGORY(ObsWebsocket, "ObsWebsocket") // NOLINT
-
 namespace QtPiDeck::Network::Obs {
+ObsWebsocketClient::ObsWebsocketClient(
+    const std::shared_ptr<Services::IMessageBus>& messageBusService,
+    const std::shared_ptr<Services::IServerSettingsStorage>& serviceSettingsStorageService,
+    const std::shared_ptr<Services::IObsMessageIdGenerator>& obsMessageIdGeneratorService,
+    const std::shared_ptr<Services::IWebSocket>& webSocketService) noexcept {
+  Utilities::initLogger(m_slg, "ObsWebsocketClient");
+  setService(messageBusService);
+  setService(serviceSettingsStorageService);
+  setService(obsMessageIdGeneratorService);
+  setService(webSocketService);
+  auto& webSocket = service<Services::IWebSocket>();
+#if defined(__cpp_lib_bind_front)
+  webSocket->setTextReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedTestMessage, this));
+  webSocket->setConnectedHandler(std::bind_front(&ObsWebsocketClient::checkAuthRequirement, this));
+#else
+  webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
+  webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
+#endif
+  webSocket->setFailHandler([this](Services::IWebSocket::ConnectionError error) {
+    constexpr std::array errors = {QAbstractSocket::SocketError::ConnectionRefusedError,
+                                   QAbstractSocket::SocketError::UnknownSocketError};
+    webSocketError(errors.at(static_cast<uint32_t>(error)));
+  });
+
+  m_authResponseReceived = service<Services::IMessageBus>()->subscribe(
+      this,
+      [this](const Bus::Message& message) noexcept {
+        const auto obj = GetAuthRequiredResponse::fromJson([&message]() noexcept {
+          QDataStream qbs{message.payload};
+          QString jsonText;
+          qbs >> jsonText;
+          return jsonText;
+        }());
+
+        if (!isRequestSuccessful(obj)) {
+          qWarning() << "Failed to check authorization(%1)"_qls.arg(*obj.error);
+          m_authorized = false;
+          return;
+        }
+
+        m_authorized = !obj.authRequired;
+      },
+      Bus::ObsMessages::GetAuthRequiredResponseReceived);
+}
+
 void ObsWebsocketClient::connectToObs() noexcept {
   m_authorized.reset();
   const auto obsAddress = [settings = service<Services::IServerSettingsStorage>(), protocol = WebSocketProtocol] {
@@ -23,8 +66,8 @@ void ObsWebsocketClient::connectToObs() noexcept {
 }
 
 void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) {
-  qCWarning(ObsWebsocket, "Connection error: %s",
-            QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error));
+  BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
+      << "Connection error: " << QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error);
 }
 
 void ObsWebsocketClient::receivedTestMessage(QString message) {
@@ -61,7 +104,8 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
   };
 
   if (m_authorized && !*m_authorized && isNotAllowedWithoutAuthorization(requestId)) {
-    qCWarning(ObsWebsocket, "Refused to send request %s without authorization", RequestTypesRaw.at(requestId));
+    BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
+        << "Refused to send request " << RequestTypesRaw.at(requestId) << " without authorization";
     return;
   }
 
