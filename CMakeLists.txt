@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(QtPiDeckServer LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core)
+message(STATUS "Found Qt${QT_VERSION_MAJOR}")
 
 mark_as_advanced(QT_QMAKE_EXECUTABLE)
 

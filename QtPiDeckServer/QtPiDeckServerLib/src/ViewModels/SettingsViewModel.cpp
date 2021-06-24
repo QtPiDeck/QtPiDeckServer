@@ -7,7 +7,7 @@ SettingsViewModel::SettingsViewModel(QObject* parent) noexcept : SettingsViewMod
 
 SettingsViewModel::SettingsViewModel(QObject* parent,
                                      const std::shared_ptr<Services::IServerSettingsStorage>& settingsStorage) noexcept
-    : QObject(parent), m_deckServerAddress(), m_deckServerPort(), m_obsWebsocketAddress(), m_obsWebsocketPort() {
+    : QObject(parent){
   Utilities::initLogger(m_slg, "SettingsViewModel");
   setService(settingsStorage);
   if (!settingsStorage) {
