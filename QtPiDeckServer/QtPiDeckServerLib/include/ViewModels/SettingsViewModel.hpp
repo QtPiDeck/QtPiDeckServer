@@ -13,14 +13,12 @@ namespace QtPiDeck::ViewModels {
 class SettingsViewModel : public QObject, public Services::UseServices<Services::IServerSettingsStorage> {
   Q_OBJECT // NOLINT
 #if QT_VERSION_MAJOR == 6
-  Q_PROPERTY(QString deckServerAddress READ deckServerAddress WRITE setDeckServerAddress NOTIFY deckServerAddressChanged
-                 BINDABLE bindableDeckServerAddress)
-  Q_PROPERTY(QString deckServerPort READ deckServerPort WRITE setDeckServerPort NOTIFY deckServerPortChanged BINDABLE
-                 bindableDeckServerPort)
-  Q_PROPERTY(QString obsWebsocketAddress READ obsWebsocketAddress WRITE setObsWebsocketAddress NOTIFY
-                 obsWebsocketAddressChanged BINDABLE bindableObsWebsocketAddress)
-  Q_PROPERTY(QString obsWebsocketPort READ obsWebsocketPort WRITE setObsWebsocketPort NOTIFY obsWebsocketPortChanged
-                 BINDABLE bindableObsWebsocketPort)
+  Q_PROPERTY(
+      QString deckServerAddress READ deckServerAddress WRITE setDeckServerAddress BINDABLE bindableDeckServerAddress)
+  Q_PROPERTY(QString deckServerPort READ deckServerPort WRITE setDeckServerPort BINDABLE bindableDeckServerPort)
+  Q_PROPERTY(QString obsWebsocketAddress READ obsWebsocketAddress WRITE setObsWebsocketAddress BINDABLE
+                 bindableObsWebsocketAddress)
+  Q_PROPERTY(QString obsWebsocketPort READ obsWebsocketPort WRITE setObsWebsocketPort BINDABLE bindableObsWebsocketPort)
 #else
   Q_PROPERTY(
       QString deckServerAddress READ deckServerAddress WRITE setDeckServerAddress NOTIFY deckServerAddressChanged)
@@ -63,7 +61,8 @@ private:
 #if QT_VERSION_MAJOR == 6
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerAddress, // NOLINT
                              &SettingsViewModel::deckServerAddressChanged)
-  Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort, &SettingsViewModel::deckServerPortChanged) // NOLINT
+  Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort,
+                             &SettingsViewModel::deckServerPortChanged)         // NOLINT
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketAddress, // NOLINT
                              &SettingsViewModel::obsWebsocketAddressChanged)
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketPort, // NOLINT

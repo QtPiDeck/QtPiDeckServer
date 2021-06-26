@@ -171,4 +171,34 @@ CT_BOOST_AUTO_TEST_CASE(setSameObsWebsocketPortValue) {
   CT_BOOST_TEST(obsWebsocketPortChangedCatcher.count() == 0);
 }
 
+#if QT_VERSION_MAJOR == 6
+CT_BOOST_AUTO_TEST_CASE(bindableDeckServerAddress) {
+  const QString value = "12345";
+  settingsViewModel.setDeckServerAddress(value);
+  const auto binding = settingsViewModel.bindableDeckServerAddress();
+  CT_BOOST_TEST(binding.value() == value);
+}
+
+CT_BOOST_AUTO_TEST_CASE(bindableDeckServerPort) {
+  const QString value = "12345";
+  settingsViewModel.setDeckServerPort(value);
+  const auto binding = settingsViewModel.bindableDeckServerPort();
+  CT_BOOST_TEST(binding.value() == value);
+}
+
+CT_BOOST_AUTO_TEST_CASE(bindableObsWebsocketAddress) {
+  const QString value = "12345";
+  settingsViewModel.setObsWebsocketAddress(value);
+  const auto binding = settingsViewModel.bindableObsWebsocketAddress();
+  CT_BOOST_TEST(binding.value() == value);
+}
+
+CT_BOOST_AUTO_TEST_CASE(bindableObsWebsocketPort) {
+  const QString value = "12345";
+  settingsViewModel.setObsWebsocketPort(value);
+  const auto binding = settingsViewModel.bindableObsWebsocketPort();
+  CT_BOOST_TEST(binding.value() == value);
+}
+#endif
+
 CT_BOOST_AUTO_TEST_SUITE_END()

@@ -78,7 +78,7 @@ void SettingsViewModel::setObsWebsocketPort(const QString& obsWebsocketPort) noe
 void SettingsViewModel::saveSettings() noexcept {
   auto& settingsStorage = service<Services::IServerSettingsStorage>();
   if (!settingsStorage) {
-    BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "No IClientSettingsStorage provided";
+    BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "No IServerSettingsStorage provided";
     return;
   }
 
