@@ -61,8 +61,8 @@ private:
 #if QT_VERSION_MAJOR == 6
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerAddress, // NOLINT
                              &SettingsViewModel::deckServerAddressChanged)
-  Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort,
-                             &SettingsViewModel::deckServerPortChanged)         // NOLINT
+  Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_deckServerPort, // NOLINT
+                             &SettingsViewModel::deckServerPortChanged)
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketAddress, // NOLINT
                              &SettingsViewModel::obsWebsocketAddressChanged)
   Q_OBJECT_BINDABLE_PROPERTY(SettingsViewModel, QString, m_obsWebsocketPort, // NOLINT
