@@ -7,10 +7,11 @@ SettingsViewModel::SettingsViewModel(QObject* parent) noexcept : SettingsViewMod
 
 SettingsViewModel::SettingsViewModel(QObject* parent,
                                      const std::shared_ptr<Services::IServerSettingsStorage>& settingsStorage) noexcept
-    : QObject(parent) {
+    : QObject(parent){
+  Utilities::initLogger(m_slg, "SettingsViewModel");
   setService(settingsStorage);
   if (!settingsStorage) {
-    qDebug() << "No IClientSettingsStorage provided";
+    BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "No IServerSettingsStorage provided";
     return;
   }
 
@@ -20,6 +21,7 @@ SettingsViewModel::SettingsViewModel(QObject* parent,
   m_obsWebsocketPort = settingsStorage->obsWebsocketPort();
 }
 
+#if QT_VERSION_MAJOR == 5
 void SettingsViewModel::setDeckServerAddress(const QString& deckServerAddress) noexcept {
   if (deckServerAddress == m_deckServerAddress) {
     return;
@@ -55,11 +57,28 @@ void SettingsViewModel::setObsWebsocketPort(const QString& obsWebsocketPort) noe
   m_obsWebsocketPort = obsWebsocketPort;
   emit obsWebsocketPortChanged();
 }
+#else
+void SettingsViewModel::setDeckServerAddress(const QString& deckServerAddress) noexcept {
+  m_deckServerAddress = deckServerAddress;
+}
+
+void SettingsViewModel::setDeckServerPort(const QString& deckServerPort) noexcept { 
+  m_deckServerPort = deckServerPort; 
+}
+
+void SettingsViewModel::setObsWebsocketAddress(const QString& obsWebsocketAddress) noexcept {
+  m_obsWebsocketAddress = obsWebsocketAddress;
+}
+
+void SettingsViewModel::setObsWebsocketPort(const QString& obsWebsocketPort) noexcept {
+  m_obsWebsocketPort = obsWebsocketPort;
+}
+#endif
 
 void SettingsViewModel::saveSettings() noexcept {
   auto& settingsStorage = service<Services::IServerSettingsStorage>();
   if (!settingsStorage) {
-    qDebug() << "No IClientSettingsStorage provided";
+    BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "No IServerSettingsStorage provided";
     return;
   }
 
@@ -68,7 +87,7 @@ void SettingsViewModel::saveSettings() noexcept {
   settingsStorage->setObsWebsocketAddress(m_obsWebsocketAddress);
   settingsStorage->setObsWebsocketPort(m_obsWebsocketPort);
 
-  qDebug() << "Settings were saved";
+  BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Settings were saved";
 }
 
 void SettingsViewModel::registerType() { qmlRegisterType<SettingsViewModel>("QtPiDeck", 1, 0, "SettingsViewModel"); }
