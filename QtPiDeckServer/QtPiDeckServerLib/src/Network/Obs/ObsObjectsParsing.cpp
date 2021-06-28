@@ -25,7 +25,7 @@ template<class T>
 inline constexpr bool is_optional_v = is_optional<T>::value;
 
 template<class T>
-auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
+[[nodiscard]] auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
   const bool hasValue = !(value.isUndefined() || value.isNull());
   if constexpr (!is_optional_v<T>) {
     if (!hasValue) {
@@ -37,31 +37,36 @@ auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
   return hasValue;
 }
 
-auto toString(const QJsonValue& value) -> QString { return value.toString(); }
-auto toBool(const QJsonValue& value) -> bool { return value.toBool(); }
+[[nodiscard]] auto toString(const QJsonValue& value) -> QString { return value.toString(); }
+[[nodiscard]] auto toBool(const QJsonValue& value) -> bool { return value.toBool(); }
 
 template<class T, class TConverter>
-void setValue(T& field, const QJsonObject& object, const QLatin1String& key, TConverter&& converter) {
-  const auto& value = object.value(key);
-  if (checkValue<T>(key, value)) {
+[[nodiscard]] auto setValue(T& field, const QJsonObject& object, const QLatin1String& key,
+                            TConverter&& converter) noexcept -> bool {
+  if (const auto& value = object.value(key); checkValue<T>(key, value)) {
     field = converter(value);
+    return true;
   }
+
+  return is_optional_v<T>;
 }
 }
 
-void setValue(QString& field, const QJsonObject& object, const QLatin1String& key) noexcept {
-  setValue(field, object, key, toString);
+[[nodiscard]] auto setValue(QString& field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
+  return setValue(field, object, key, toString);
 }
 
-void setValue(std::optional<QString>& field, const QJsonObject& object, const QLatin1String& key) noexcept {
-  setValue(field, object, key, toString);
+[[nodiscard]] auto setValue(std::optional<QString>& field, const QJsonObject& object, const QLatin1String& key) noexcept
+    -> bool {
+  return setValue(field, object, key, toString);
 }
 
-void setValue(bool& field, const QJsonObject& object, const QLatin1String& key) noexcept {
-  setValue(field, object, key, toBool);
+[[nodiscard]] auto setValue(bool& field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
+  return setValue(field, object, key, toBool);
 }
 
-void setValue(std::optional<bool>& field, const QJsonObject& object, const QLatin1String& key) noexcept {
-  setValue(field, object, key, toBool);
+[[nodiscard]] auto setValue(std::optional<bool>& field, const QJsonObject& object, const QLatin1String& key) noexcept
+    -> bool {
+  return setValue(field, object, key, toBool);
 }
 }

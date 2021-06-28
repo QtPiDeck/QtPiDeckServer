@@ -66,4 +66,22 @@ CT_BOOST_AUTO_TEST_CASE(parseOptionalBool) {
   CT_BOOST_TEST(objWithFullParsing.importantValue.value() == true);
 }
 
+struct SecondTestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStatus {
+  bool importantValue;
+};
+
+CT_BOOST_AUTO_TEST_CASE(handleMissingMandatoryField) {
+  const auto valueKey = "val"_qls;
+  const auto json = [&]() {
+    QJsonObject obj;    
+    obj[TestObject::statusField] = TestObject::successStatus;
+    return QString{QJsonDocument{obj}.toJson()};
+  }();
+
+  const auto objWithFullParsing = QtPiDeck::Network::Obs::withJsonObject<SecondTestObject>(json)
+                                      .parse(&SecondTestObject::importantValue, valueKey)
+                                      .getResult();
+  CT_BOOST_TEST(!objWithFullParsing.parseSuccessful);
+}
+
 CT_BOOST_AUTO_TEST_SUITE_END()
