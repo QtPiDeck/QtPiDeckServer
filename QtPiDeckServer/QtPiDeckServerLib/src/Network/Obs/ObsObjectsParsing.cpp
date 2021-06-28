@@ -1,5 +1,8 @@
 #include "Network/Obs/ObsObjectsParsing.hpp"
 
+#include <boost/hana/at_key.hpp>
+#include <boost/hana/map.hpp>
+#include <boost/hana/pair.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/log/trivial.hpp>
@@ -41,32 +44,26 @@ template<class T>
 [[nodiscard]] auto toBool(const QJsonValue& value) -> bool { return value.toBool(); }
 
 template<class T, class TConverter>
-[[nodiscard]] auto setValue(T& field, const QJsonObject& object, const QLatin1String& key,
+[[nodiscard]] auto setValue(T* field, const QJsonObject& object, const QLatin1String& key,
                             TConverter&& converter) noexcept -> bool {
   if (const auto& value = object.value(key); checkValue<T>(key, value)) {
-    field = converter(value);
+    *field = converter(value);
     return true;
   }
 
   return is_optional_v<T>;
 }
+
+namespace hana = boost::hana;
+constexpr auto converters = hana::make_map(hana::make_pair(hana::type_c<bool*>, toBool),
+                                           hana::make_pair(hana::type_c<std::optional<bool>*>, toBool),
+                                           hana::make_pair(hana::type_c<QString*>, toString),
+                                           hana::make_pair(hana::type_c<std::optional<QString>*>, toString));
 }
 
-[[nodiscard]] auto setValue(QString& field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
-  return setValue(field, object, key, toString);
-}
-
-[[nodiscard]] auto setValue(std::optional<QString>& field, const QJsonObject& object, const QLatin1String& key) noexcept
-    -> bool {
-  return setValue(field, object, key, toString);
-}
-
-[[nodiscard]] auto setValue(bool& field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
-  return setValue(field, object, key, toBool);
-}
-
-[[nodiscard]] auto setValue(std::optional<bool>& field, const QJsonObject& object, const QLatin1String& key) noexcept
-    -> bool {
-  return setValue(field, object, key, toBool);
+[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
+  return std::visit(
+      [&](auto arg) { return setValue(arg, object, key, converters[boost::hana::type_c<decltype(arg)>]); },
+      field);
 }
 }
