@@ -2,6 +2,7 @@
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/ObsWebsocketClient.hpp"
+#include "Utilities/Literals.hpp"
 #include "Utilities/Logging.hpp"
 
 auto main(int argc, char* argv[]) -> int {
@@ -56,6 +57,7 @@ CT_BOOST_AUTO_TEST_CASE(connectWithoutStorage) {
 
   client->connectToObs();
   using namespace QtPiDeck::Network::Obs;
+  using namespace QtPiDeck::Utilities::literals;
   CT_BOOST_TEST(std::dynamic_pointer_cast<ConnectableWebSocket>(webSocket)->address() == "ws://localhost:4444"_qs);
 }
 
@@ -93,6 +95,7 @@ CT_BOOST_AUTO_TEST_CASE(connectWithStorage) {
 
   client->connectToObs();
   using namespace QtPiDeck::Network::Obs;
+  using namespace QtPiDeck::Utilities::literals;
   CT_BOOST_TEST(std::dynamic_pointer_cast<ConnectableWebSocket>(webSocket)->address() ==
                 "ws://%1:%2"_qs.arg(ServerSettingsStorage::Address).arg(ServerSettingsStorage::Port));
 }

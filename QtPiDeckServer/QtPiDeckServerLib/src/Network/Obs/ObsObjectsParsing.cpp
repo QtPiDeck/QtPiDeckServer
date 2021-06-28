@@ -7,9 +7,14 @@
 #include "Utilities/Logging.hpp"
 
 namespace QtPiDeck::Network::Obs {
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(obs_parser_logger, boost::log::sources::logger_mt) // NOLINT
-
 namespace {
+BOOST_LOG_INLINE_GLOBAL_LOGGER_INIT( // NOLINT
+    obs_parser_logger, boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level>) {
+  boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> lg;
+  Utilities::initLogger(lg, "obs_parsing");
+  return lg;
+}
+
 template<class T>
 struct is_optional : std::false_type {};
 
@@ -21,12 +26,11 @@ inline constexpr bool is_optional_v = is_optional<T>::value;
 
 template<class T>
 auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
-  auto& lg = obs_parser_logger::get();
   const bool hasValue = !(value.isUndefined() || value.isNull());
-  if constexpr (is_optional_v<T>) {
+  if constexpr (!is_optional_v<T>) {
     if (!hasValue) {
-      BOOST_LOG_STREAM_WITH_PARAMS(lg, (boost::log::keywords::severity = Utilities::severity::warning))
-          << "no value for non-optional key " << key.data() << " (" << typeid(typename T::value_type).name() << ")";
+      BOOST_LOG_SEV(obs_parser_logger::get(), Utilities::severity::warning)
+          << "no value for non-optional key " << key.data() << " (" << typeid(T).name() << ")";
     }
   }
 
@@ -38,7 +42,8 @@ auto toBool(const QJsonValue& value) -> bool { return value.toBool(); }
 
 template<class T, class TConverter>
 void setValue(T& field, const QJsonObject& object, const QLatin1String& key, TConverter&& converter) {
-  if (const auto& value = object[key]; checkValue<T>(key, value)) {
+  const auto& value = object.value(key);
+  if (checkValue<T>(key, value)) {
     field = converter(value);
   }
 }

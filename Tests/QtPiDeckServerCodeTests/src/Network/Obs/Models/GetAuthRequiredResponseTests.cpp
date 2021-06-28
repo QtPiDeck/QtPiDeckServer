@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE GetAuthRequiredResponseTests // NOLINT
 #include "BoostUnitTest.hpp"
 
-#include "Network/Obs/GetAuthRequiredResponse.hpp"
+#include "Network/Obs/Models/GetAuthRequiredResponse.hpp"
 #include "Utilities/Logging.hpp"
 #include "Utilities/Literals.hpp"
 
@@ -18,6 +18,7 @@ auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std:
 CT_BOOST_AUTO_TEST_SUITE(GetAuthRequiredResponseTests)
 
 using namespace QtPiDeck::Network::Obs;
+using namespace QtPiDeck::Network::Obs::Models;
 
 CT_BOOST_AUTO_TEST_CASE(GetAuthRequiredResponseShouldBeParsedFromJson) {
   using namespace QtPiDeck::Utilities::literals;

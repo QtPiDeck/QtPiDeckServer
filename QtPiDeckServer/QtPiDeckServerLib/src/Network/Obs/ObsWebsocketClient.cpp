@@ -9,6 +9,8 @@
 
 #include <QMetaEnum>
 
+#include "Utilities/Literals.hpp"
+
 namespace QtPiDeck::Network::Obs {
 ObsWebsocketClient::ObsWebsocketClient(
     const std::shared_ptr<Services::IMessageBus>& messageBusService,
@@ -37,7 +39,7 @@ ObsWebsocketClient::ObsWebsocketClient(
   m_authResponseReceived = service<Services::IMessageBus>()->subscribe(
       this,
       [this](const Bus::Message& message) noexcept {
-        const auto obj = GetAuthRequiredResponse::fromJson([&message]() noexcept {
+        const auto obj = Models::GetAuthRequiredResponse::fromJson([&message]() noexcept {
           QDataStream qbs{message.payload};
           QString jsonText;
           qbs >> jsonText;
@@ -45,6 +47,7 @@ ObsWebsocketClient::ObsWebsocketClient(
         }());
 
         if (!isRequestSuccessful(obj)) {
+          using namespace Utilities::literals;
           qWarning() << "Failed to check authorization(%1)"_qls.arg(*obj.error);
           m_authorized = false;
           return;
@@ -56,6 +59,7 @@ ObsWebsocketClient::ObsWebsocketClient(
 }
 
 void ObsWebsocketClient::connectToObs() noexcept {
+  using namespace Utilities::literals;
   m_authorized.reset();
   const auto obsAddress = [settings = service<Services::IServerSettingsStorage>(), protocol = WebSocketProtocol] {
     return settings ? "%1%2:%3"_qls.arg(protocol, settings->obsWebsocketAddress(), settings->obsWebsocketPort())
@@ -77,6 +81,8 @@ void ObsWebsocketClient::receivedTestMessage(QString message) {
     qds << message;
     return qba;
   };
+
+  using namespace Utilities::literals;
 
   if (const auto obj = QJsonDocument::fromJson(message.toUtf8()).object(); obj.contains("update-type"_qls)) {
     // to be implemented
@@ -112,6 +118,7 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
   m_pendingResponses.emplace(messageId, callbackMessageId);
 
   const QJsonDocument doc = [&requestId, &messageId]() noexcept {
+    using namespace Utilities::literals;
     QJsonObject obj;
     obj["request-type"_qls] = RequestTypes.at(requestId);
     obj["message-id"_qls] = messageId;

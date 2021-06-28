@@ -4,10 +4,10 @@
 
 #include <QString>
 
-#include "ObsRequests.hpp"
+#include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
 
-namespace QtPiDeck::Network::Obs {
+namespace QtPiDeck::Network::Obs::Models {
 using namespace QtPiDeck::Utilities::literals;
 struct ObsResponseStatus {
     QString status{};

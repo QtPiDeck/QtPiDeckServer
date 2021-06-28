@@ -11,7 +11,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "Bus/ObsMessages.hpp"
-#include "Network/Obs/GetAuthRequiredResponse.hpp"
+#include "Network/Obs/Models/GetAuthRequiredResponse.hpp"
 #include "ObsRequests.hpp"
 #include "Services/IMessageBus.hpp"
 #include "Services/IObsMessageIdGenerator.hpp"
