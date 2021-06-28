@@ -67,7 +67,7 @@ CT_BOOST_AUTO_TEST_CASE(parseOptionalBool) {
 }
 
 struct SecondTestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStatus {
-  bool importantValue;
+  bool importantValue{};
 };
 
 CT_BOOST_AUTO_TEST_CASE(handleMissingMandatoryField) {

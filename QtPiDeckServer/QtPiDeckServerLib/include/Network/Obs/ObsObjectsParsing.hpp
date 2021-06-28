@@ -14,7 +14,7 @@
 namespace QtPiDeck::Network::Obs {
 using MessageField = std::variant<QString*, std::optional<QString>*, bool*, std::optional<bool>*>;
 
-[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool;
+[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) -> bool;
 
 template<class TObsObj>
 struct [[nodiscard]] withJsonObject {
