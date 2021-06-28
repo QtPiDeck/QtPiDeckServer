@@ -2,7 +2,7 @@
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/ObsObjectsParsing.hpp"
-#include "Network/Obs/ObsResponseStatus.hpp"
+#include "Network/Obs/Models/ObsResponseStatus.hpp"
 #include "Utilities/Literals.hpp"
 #include "Utilities/Logging.hpp"
 
@@ -26,11 +26,11 @@ CT_BOOST_AUTO_TEST_SUITE(ObsObjectsParsingTests)
 
 using namespace QtPiDeck::Utilities::literals;
 
-struct TestObject : QtPiDeck::Network::Obs::ObsResponseStatus {
+struct TestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStatus {
   std::optional<bool> importantValue;
 };
 
-CT_BOOST_AUTO_TEST_CASE(ObjectSpecificFieldShouldBeSkippedIfErrorOccured) {
+CT_BOOST_AUTO_TEST_CASE(objectSpecificFieldShouldBeSkippedIfErrorOccured) {
   const auto errorStr = "ERROR"_qs;
   const auto valueKey = "val"_qls;
   const auto json = [&]() {
@@ -49,6 +49,39 @@ CT_BOOST_AUTO_TEST_CASE(ObjectSpecificFieldShouldBeSkippedIfErrorOccured) {
   CT_BOOST_TEST(objWithBasicParsing.status == objWithFullParsing.status);
   CT_BOOST_TEST(!objWithBasicParsing.importantValue.has_value());
   CT_BOOST_TEST(!objWithFullParsing.importantValue.has_value());
+}
+
+CT_BOOST_AUTO_TEST_CASE(parseOptionalBool) {
+  const auto valueKey = "val"_qls;
+  const auto json = [&]() {
+    QJsonObject obj;
+    obj[valueKey] = true;
+    obj[TestObject::statusField] = TestObject::successStatus;
+    return QString{QJsonDocument{obj}.toJson()};
+  }();
+
+  const auto objWithFullParsing =
+      QtPiDeck::Network::Obs::withJsonObject<TestObject>(json).parse(&TestObject::importantValue, valueKey).getResult();
+  CT_BOOST_TEST(objWithFullParsing.importantValue.has_value());
+  CT_BOOST_TEST(objWithFullParsing.importantValue.value() == true);
+}
+
+struct SecondTestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStatus {
+  bool importantValue{};
+};
+
+CT_BOOST_AUTO_TEST_CASE(handleMissingMandatoryField) {
+  const auto valueKey = "val"_qls;
+  const auto json = [&]() {
+    QJsonObject obj;    
+    obj[TestObject::statusField] = TestObject::successStatus;
+    return QString{QJsonDocument{obj}.toJson()};
+  }();
+
+  const auto objWithFullParsing = QtPiDeck::Network::Obs::withJsonObject<SecondTestObject>(json)
+                                      .parse(&SecondTestObject::importantValue, valueKey)
+                                      .getResult();
+  CT_BOOST_TEST(!objWithFullParsing.parseSuccessful);
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

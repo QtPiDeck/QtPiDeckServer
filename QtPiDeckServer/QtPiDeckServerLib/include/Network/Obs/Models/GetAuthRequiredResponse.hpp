@@ -5,11 +5,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "ObsObjectsParsing.hpp"
-#include "ObsRequests.hpp"
+#include "Network/Obs/ObsObjectsParsing.hpp"
+#include "Network/Obs/ObsRequests.hpp"
 #include "ObsResponseStatus.hpp"
 
-namespace QtPiDeck::Network::Obs {
+namespace QtPiDeck::Network::Obs::Models {
 struct GetAuthRequiredResponse : ObsResponseStatus {
   bool authRequired{};
   std::optional<QString> challenge{};

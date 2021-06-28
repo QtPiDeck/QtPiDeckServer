@@ -4,14 +4,17 @@
 
 #include <QString>
 
-#include "ObsRequests.hpp"
+#include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
 
-namespace QtPiDeck::Network::Obs {
+namespace QtPiDeck::Network::Obs::Models {
 using namespace QtPiDeck::Utilities::literals;
 struct ObsResponseStatus {
     QString status{};
     std::optional<QString> error{};
+    // false if there was an error during parsing
+    // (like lack of mandatory field in json)
+    bool parseSuccessful{true};
 
     static const inline QLatin1String statusField = "status"_qls;
     static const inline QLatin1String errorField = "error"_qls;
