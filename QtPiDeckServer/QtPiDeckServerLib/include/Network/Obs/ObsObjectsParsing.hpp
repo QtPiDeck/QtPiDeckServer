@@ -22,7 +22,7 @@ struct [[nodiscard]] withJsonObject {
     Utilities::initLogger(m_slg, "withJsonObject");
     BOOST_LOG_SEV(m_slg, Utilities::severity::trace) << "Parsing " << typeid(TObsObj).name();
     m_obsObj.parseSuccessful &= setValue(&m_obsObj.status, jsonObject, TObsObj::statusField);
-    //m_obsObj.parseSuccessful &= setValue(&m_obsObj.error, jsonObject, TObsObj::errorField);
+    m_obsObj.parseSuccessful &= setValue(&m_obsObj.error, jsonObject, TObsObj::errorField);
     m_isOk = isRequestSuccessful(m_obsObj);
   }
 
@@ -32,7 +32,7 @@ struct [[nodiscard]] withJsonObject {
   template<class TField>
   [[nodiscard]] auto parse(TField TObsObj::*field, const QLatin1String& key) noexcept -> withJsonObject& {
     if (m_isOk) {
-      //m_obsObj.parseSuccessful &= setValue(&(m_obsObj.*field), m_jsonObject, key);
+      m_obsObj.parseSuccessful &= setValue(&(m_obsObj.*field), m_jsonObject, key);
     }
 
     return *this;

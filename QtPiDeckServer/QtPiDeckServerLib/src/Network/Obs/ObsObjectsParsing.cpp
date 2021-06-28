@@ -63,7 +63,7 @@ constexpr auto converters = hana::make_map(hana::make_pair(hana::type_c<bool*>, 
 
 [[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
   return std::visit(
-      [&](auto arg) { return setValue(arg, object, key, converters[boost::hana::type_c<decltype(arg)>]); },
+      [&](auto arg) -> bool { return setValue(arg, object, key, converters[boost::hana::type_c<decltype(arg)>]); },
       field);
 }
 }
