@@ -55,15 +55,13 @@ template<class T, class TConverter>
 }
 
 namespace hana = boost::hana;
-constexpr auto converters = hana::make_map(hana::make_pair(hana::type_c<bool*>, toBool),
-                                           hana::make_pair(hana::type_c<std::optional<bool>*>, toBool),
-                                           hana::make_pair(hana::type_c<QString*>, toString),
-                                           hana::make_pair(hana::type_c<std::optional<QString>*>, toString));
+constexpr auto converters = hana::make_map(
+    hana::make_pair(hana::type_c<bool>, toBool), hana::make_pair(hana::type_c<std::optional<bool>>, toBool),
+    hana::make_pair(hana::type_c<QString>, toString), hana::make_pair(hana::type_c<std::optional<QString>>, toString));
 }
 
 [[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
   return boost::apply_visitor(
-      [&](auto arg) -> bool { return setValue(arg, object, key, converters[boost::hana::type_c<decltype(arg)>]); },
-      field);
+      [&]<class T>(T* arg) { return setValue(arg, object, key, converters[boost::hana::type_c<T>]); }, field);
 }
 }
