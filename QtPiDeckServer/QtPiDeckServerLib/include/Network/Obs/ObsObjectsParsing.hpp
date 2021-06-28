@@ -2,7 +2,8 @@
 
 #include <optional>
 #include <type_traits>
-#include <variant>
+
+#include <boost/variant.hpp>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -12,9 +13,9 @@
 #include "Utilities/Logging.hpp"
 
 namespace QtPiDeck::Network::Obs {
-using MessageField = std::variant<QString*, std::optional<QString>*, bool*, std::optional<bool>*>;
+using MessageField = boost::variant<QString*, std::optional<QString>*, bool*, std::optional<bool>*>;
 
-[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) -> bool;
+[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool;
 
 template<class TObsObj>
 struct [[nodiscard]] withJsonObject {

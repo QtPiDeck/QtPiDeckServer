@@ -28,7 +28,7 @@ template<class T>
 inline constexpr bool is_optional_v = is_optional<T>::value;
 
 template<class T>
-[[nodiscard]] auto checkValue(const QLatin1String& key, const QJsonValue& value) -> bool {
+[[nodiscard]] auto checkValue(const QLatin1String& key, const QJsonValue& value) noexcept -> bool {
   const bool hasValue = !(value.isUndefined() || value.isNull());
   if constexpr (!is_optional_v<T>) {
     if (!hasValue) {
@@ -61,8 +61,8 @@ constexpr auto converters = hana::make_map(hana::make_pair(hana::type_c<bool*>, 
                                            hana::make_pair(hana::type_c<std::optional<QString>*>, toString));
 }
 
-[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) -> bool {
-  return std::visit(
+[[nodiscard]] auto setValue(MessageField field, const QJsonObject& object, const QLatin1String& key) noexcept -> bool {
+  return boost::apply_visitor(
       [&](auto arg) -> bool { return setValue(arg, object, key, converters[boost::hana::type_c<decltype(arg)>]); },
       field);
 }
