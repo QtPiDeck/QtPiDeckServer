@@ -11,8 +11,8 @@ WebSocketpp::WebSocketpp() noexcept {
   m_webSocket.start_perpetual();
   m_webSocket.set_message_handler(
       [this](websocketpp::connection_hdl /*hdl*/, websocketpp::config::asio_client::message_type::ptr msg) {
-        if (m_textReceivedHandler) {
-          m_textReceivedHandler(QString::fromStdString(msg->get_payload()));
+        if (m_messageReceivedHandler) {
+          m_messageReceivedHandler(QByteArray::fromStdString(msg->get_payload()));
         }
       });
   m_webSocket.set_fail_handler([this](websocketpp::connection_hdl /*hdl*/) {
@@ -21,7 +21,7 @@ WebSocketpp::WebSocketpp() noexcept {
     }
   });
   m_webSocket.set_open_handler([this](websocketpp::connection_hdl hdl) {
-    m_connectionHandle = hdl;
+    m_connectionHandle = std::move(hdl);
     if (m_connectedHandler) {
       m_connectedHandler();
     }
@@ -69,12 +69,13 @@ auto WebSocketpp::connected() noexcept -> bool {
   return con && con->get_state() == websocketpp::session::state::open;
 }
 
-auto WebSocketpp::send(QLatin1String message) noexcept -> std::optional<SendingError> {
+auto WebSocketpp::send(QByteArray message) noexcept -> std::optional<SendingError> {
   if (!connected()) {
     return SendingError::NotConnected;
   }
 
   websocketpp::lib::error_code ec;
+  // makes a copy of data
   m_webSocket.send(m_connectionHandle, message.data(), message.size(), websocketpp::frame::opcode::text, ec);
   if (ec.value()) {
     // return some error?

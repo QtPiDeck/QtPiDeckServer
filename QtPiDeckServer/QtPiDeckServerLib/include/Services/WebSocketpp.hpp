@@ -14,8 +14,8 @@ public:
   ~WebSocketpp() noexcept;
   void connect(QStringView address) noexcept final;
   void disconnect() noexcept final;
-  [[nodiscard]] auto send(QLatin1String message) noexcept -> std::optional<SendingError> final;
-  void setTextReceivedHandler(TextReceivedHandler handler) noexcept final { m_textReceivedHandler = handler; }
+  [[nodiscard]] auto send(QByteArray message) noexcept -> std::optional<SendingError> final;
+  void setMessageReceivedHandler(MessageReceivedHandler handler) noexcept final { m_messageReceivedHandler = handler; }
   void setFailHandler(FailHandler handler) noexcept final { m_failHandler = handler; }
   void setConnectedHandler(ConnectedHandler handler) noexcept final { m_connectedHandler = handler; }
 
@@ -24,7 +24,7 @@ private:
 
   websocketpp::client<websocketpp::config::asio_client> m_webSocket{};
   websocketpp::connection_hdl m_connectionHandle{};
-  TextReceivedHandler m_textReceivedHandler{};
+  MessageReceivedHandler m_messageReceivedHandler{};
   FailHandler m_failHandler{};
   ConnectedHandler m_connectedHandler{};
   std::thread m_iothread{};
