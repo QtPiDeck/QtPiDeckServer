@@ -24,7 +24,7 @@ ObsWebsocketClient::ObsWebsocketClient(
   setService(webSocketService);
   auto& webSocket = service<Services::IWebSocket>();
 #if defined(__cpp_lib_bind_front)
-  webSocket->setTextReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedMessage, this));
+  webSocket->setMessageReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedMessage, this));
   webSocket->setConnectedHandler(std::bind_front(&ObsWebsocketClient::checkAuthRequirement, this));
 #else
   webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
@@ -85,7 +85,7 @@ void ObsWebsocketClient::receivedMessage(QByteArray message) {
 
   using namespace Utilities::literals;
 
-  if (const auto obj = QJsonDocument::fromJson(message.toUtf8()).object(); obj.contains("update-type"_qls)) {
+  if (const auto obj = QJsonDocument::fromJson(message).object(); obj.contains("update-type"_qls)) {
     // to be implemented
   } else {
     const auto& id = obj["message-id"_qls].toString();

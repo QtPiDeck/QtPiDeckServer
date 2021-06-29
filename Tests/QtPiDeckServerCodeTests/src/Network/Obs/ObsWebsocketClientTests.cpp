@@ -17,7 +17,7 @@ public:
   void connect(QStringView /*address*/) noexcept override {}
   void disconnect() noexcept override {}
   auto send(QByteArray /*message*/) noexcept -> std::optional<SendingError> override { return {}; }
-  void setTextReceivedHandler(TextReceivedHandler /*handler*/) noexcept override {}
+  void setMessageReceivedHandler(MessageReceivedHandler /*handler*/) noexcept override {}
   void setConnectedHandler(ConnectedHandler /*handler*/) noexcept override {}
   void setFailHandler(FailHandler /*handler*/) noexcept override {}
 };
