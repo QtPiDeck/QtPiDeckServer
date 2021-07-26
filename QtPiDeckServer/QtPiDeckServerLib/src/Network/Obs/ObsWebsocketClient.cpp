@@ -27,7 +27,7 @@ ObsWebsocketClient::ObsWebsocketClient(
   webSocket->setMessageReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedMessage, this));
   webSocket->setConnectedHandler(std::bind_front(&ObsWebsocketClient::checkAuthRequirement, this));
 #else
-  webSocket->setMessageReceivedHandler([this](QString message) { receivedMessage(std::move(message)); });
+  webSocket->setMessageReceivedHandler([this](QByteArray message) { receivedMessage(std::move(message)); });
   webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
 #endif
   webSocket->setFailHandler([this](Services::IWebSocket::ConnectionError error) {
