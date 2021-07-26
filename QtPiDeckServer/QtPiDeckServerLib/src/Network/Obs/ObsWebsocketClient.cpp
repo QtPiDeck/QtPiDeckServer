@@ -24,10 +24,10 @@ ObsWebsocketClient::ObsWebsocketClient(
   setService(webSocketService);
   auto& webSocket = service<Services::IWebSocket>();
 #if defined(__cpp_lib_bind_front)
-  webSocket->setTextReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedTestMessage, this));
+  webSocket->setMessageReceivedHandler(std::bind_front(&ObsWebsocketClient::receivedMessage, this));
   webSocket->setConnectedHandler(std::bind_front(&ObsWebsocketClient::checkAuthRequirement, this));
 #else
-  webSocket->setTextReceivedHandler([this](QString message) { receivedTestMessage(std::move(message)); });
+  webSocket->setMessageReceivedHandler([this](QByteArray message) { receivedMessage(std::move(message)); });
   webSocket->setConnectedHandler([this] { checkAuthRequirement(); });
 #endif
   webSocket->setFailHandler([this](Services::IWebSocket::ConnectionError error) {
@@ -48,7 +48,8 @@ ObsWebsocketClient::ObsWebsocketClient(
 
         if (!isRequestSuccessful(obj)) {
           using namespace Utilities::literals;
-          qWarning() << "Failed to check authorization(%1)"_qls.arg(*obj.error);
+          BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
+              << "Failed to check authorization(" << obj.error.value().toStdString() << ")";
           m_authorized = false;
           return;
         }
@@ -74,7 +75,7 @@ void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) {
       << "Connection error: " << QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error);
 }
 
-void ObsWebsocketClient::receivedTestMessage(QString message) {
+void ObsWebsocketClient::receivedMessage(QByteArray message) {
   auto convertMessage = [&message] {
     QByteArray qba;
     QDataStream qds{&qba, QIODevice::WriteOnly};
@@ -84,7 +85,7 @@ void ObsWebsocketClient::receivedTestMessage(QString message) {
 
   using namespace Utilities::literals;
 
-  if (const auto obj = QJsonDocument::fromJson(message.toUtf8()).object(); obj.contains("update-type"_qls)) {
+  if (const auto obj = QJsonDocument::fromJson(message).object(); obj.contains("update-type"_qls)) {
     // to be implemented
   } else {
     const auto& id = obj["message-id"_qls].toString();
@@ -125,9 +126,6 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
     return QJsonDocument{obj};
   }();
 
-  const auto byteArray = doc.toJson(QJsonDocument::Compact);
-  const auto jsonString = QLatin1String{byteArray};
-
-  [[maybe_unused]] auto sendResult = service<Services::IWebSocket>()->send(jsonString);
+  [[maybe_unused]] auto sendResult = service<Services::IWebSocket>()->send(doc.toJson(QJsonDocument::Compact));
 }
 }

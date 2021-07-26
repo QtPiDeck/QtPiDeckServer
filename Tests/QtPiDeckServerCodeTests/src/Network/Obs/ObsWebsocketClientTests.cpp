@@ -16,8 +16,8 @@ class NoopWebSocket : public QtPiDeck::Services::IWebSocket {
 public:
   void connect(QStringView /*address*/) noexcept override {}
   void disconnect() noexcept override {}
-  auto send(QLatin1String /*message*/) noexcept -> std::optional<SendingError> override { return {}; }
-  void setTextReceivedHandler(TextReceivedHandler /*handler*/) noexcept override {}
+  auto send(QByteArray /*message*/) noexcept -> std::optional<SendingError> override { return {}; }
+  void setMessageReceivedHandler(MessageReceivedHandler /*handler*/) noexcept override {}
   void setConnectedHandler(ConnectedHandler /*handler*/) noexcept override {}
   void setFailHandler(FailHandler /*handler*/) noexcept override {}
 };
@@ -117,9 +117,8 @@ private:
 class ConnectedWebSocket final : public NoopWebSocket {
 public:
   void setConnectedHandler(ConnectedHandler handler) noexcept final { m_handler = handler; }
-  auto send(QLatin1String message) noexcept -> std::optional<SendingError> final {
-    m_data.resize(std::size(message));
-    std::memcpy(std::data(m_data), std::data(message), std::size(message));
+  auto send(QByteArray message) noexcept -> std::optional<SendingError> final {
+    m_data = message;
     m_message = QLatin1String{m_data};
     return {};
   }

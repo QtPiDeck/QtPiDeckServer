@@ -5,23 +5,24 @@ void WebSocketQt::connect(QStringView address) noexcept { m_webSocket.open(QUrl{
 
 void WebSocketQt::disconnect() noexcept { m_webSocket.close(); }
 
-auto WebSocketQt::send(QLatin1String message) noexcept -> std::optional<SendingError> {
+auto WebSocketQt::send(QByteArray message) noexcept -> std::optional<SendingError> {
   if (!m_webSocket.isValid()) {
     return SendingError::NotConnected;
   }
 
-  m_webSocket.sendTextMessage(message);
+  // makes copy of payload
+  m_webSocket.sendBinaryMessage(message);
 
   return std::nullopt;
 }
 
-void WebSocketQt::setTextReceivedHandler(TextReceivedHandler handler) noexcept {
-  if (m_textReceivedConnection) {
-    QObject::disconnect(*m_textReceivedConnection);
+void WebSocketQt::setMessageReceivedHandler(MessageReceivedHandler handler) noexcept {
+  if (m_messageReceivedConnection) {
+    QObject::disconnect(*m_messageReceivedConnection);
   }
 
-  m_textReceivedConnection = QObject::connect(&m_webSocket, &QWebSocket::textMessageReceived, this,
-                                              [handler](const QString& msg) { handler(msg); });
+  m_messageReceivedConnection = QObject::connect(&m_webSocket, &QWebSocket::binaryMessageReceived, this,
+                                                 [handler](const QByteArray& msg) { handler(msg); });
 }
 
 void WebSocketQt::setFailHandler(FailHandler handler) noexcept {
