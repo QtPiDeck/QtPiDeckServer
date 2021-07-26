@@ -13,7 +13,7 @@ public:
   WebSocketpp();
   WebSocketpp(const WebSocketpp& /*other*/) = delete;
   WebSocketpp(WebSocketpp&& /*other*/) = delete;
-  ~WebSocketpp() noexcept;
+  ~WebSocketpp() noexcept final;
   auto operator=(const WebSocketpp& /*other*/) -> WebSocketpp& = delete;
   auto operator=(WebSocketpp&& /*other*/) -> WebSocketpp& = delete;
   void connect(QStringView address) noexcept final;

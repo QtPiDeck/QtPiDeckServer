@@ -10,12 +10,12 @@ WebSocketpp::WebSocketpp() {
   m_webSocket.init_asio();
   m_webSocket.start_perpetual();
   m_webSocket.set_message_handler(
-      [this](websocketpp::connection_hdl /*hdl*/, websocketpp::config::asio_client::message_type::ptr msg) {
+      [this](const websocketpp::connection_hdl& /*hdl*/, const websocketpp::config::asio_client::message_type::ptr& msg) {
         if (m_messageReceivedHandler) {
           m_messageReceivedHandler(QByteArray::fromStdString(msg->get_payload()));
         }
       });
-  m_webSocket.set_fail_handler([this](websocketpp::connection_hdl /*hdl*/) {
+  m_webSocket.set_fail_handler([this](const websocketpp::connection_hdl& /*hdl*/) {
     if (m_failHandler) {
       m_failHandler(ConnectionError::RefusedConnection);
     }
