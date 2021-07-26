@@ -10,8 +10,12 @@
 namespace QtPiDeck::Services {
 class WebSocketpp final : public IWebSocket {
 public:
-  WebSocketpp() noexcept;
+  WebSocketpp();
+  WebSocketpp(const WebSocketpp& /*other*/) = delete;
+  WebSocketpp(WebSocketpp&& /*other*/) = delete;
   ~WebSocketpp() noexcept;
+  auto operator=(const WebSocketpp& /*other*/) -> WebSocketpp& = delete;
+  auto operator=(WebSocketpp&& /*other*/) -> WebSocketpp& = delete;
   void connect(QStringView address) noexcept final;
   void disconnect() noexcept final;
   [[nodiscard]] auto send(QByteArray message) noexcept -> std::optional<SendingError> final;

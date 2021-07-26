@@ -3,7 +3,7 @@
 #include <QDebug>
 
 namespace QtPiDeck::Services {
-WebSocketpp::WebSocketpp() noexcept {
+WebSocketpp::WebSocketpp() {
   m_webSocket.set_access_channels(websocketpp::log::elevel::none);
   m_webSocket.set_error_channels(websocketpp::log::elevel::all);
 
@@ -52,7 +52,7 @@ void WebSocketpp::connect(QStringView address) noexcept {
 
   websocketpp::lib::error_code ec;
   const auto connection = m_webSocket.get_connection(address.toString().toStdString(), ec);
-  if (ec.value()) {
+  if (ec.value() != 0) {
     if (m_failHandler) {
       m_failHandler(ConnectionError::Unspecified);
     }
@@ -77,7 +77,7 @@ auto WebSocketpp::send(QByteArray message) noexcept -> std::optional<SendingErro
   websocketpp::lib::error_code ec;
   // makes a copy of data
   m_webSocket.send(m_connectionHandle, message.data(), message.size(), websocketpp::frame::opcode::text, ec);
-  if (ec.value()) {
+  if (ec.value() != 0) {
     // return some error?
   }
 
