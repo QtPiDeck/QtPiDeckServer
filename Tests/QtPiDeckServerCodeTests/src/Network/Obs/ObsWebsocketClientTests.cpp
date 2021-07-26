@@ -51,9 +51,7 @@ public:
 CT_BOOST_AUTO_TEST_CASE(connectWithoutStorage) {
   auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new ConnectableWebSocket());
   auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
-      std::shared_ptr<QtPiDeck::Services::IMessageBus>(new NoopMessageBus),
-      std::shared_ptr<QtPiDeck::Services::IServerSettingsStorage>(),
-      std::shared_ptr<QtPiDeck::Services::IObsMessageIdGenerator>(), webSocket);
+      std::shared_ptr<QtPiDeck::Services::IMessageBus>(new NoopMessageBus), nullptr, nullptr, webSocket);
 
   client->connectToObs();
   using namespace QtPiDeck::Network::Obs;

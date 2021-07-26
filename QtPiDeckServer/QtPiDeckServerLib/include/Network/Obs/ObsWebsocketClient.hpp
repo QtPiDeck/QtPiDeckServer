@@ -49,7 +49,9 @@ private:
 
   std::unordered_map<QString, Bus::ObsMessages> m_pendingResponses{};
 
-  std::optional<bool> m_authorized;
+  enum class AuthorizationStatus { Unchecked, Authorized, NonAuthorized };
+
+  AuthorizationStatus m_authorizationStatus{AuthorizationStatus::Unchecked};
 
   Utilities::Connection m_authResponseReceived;
   mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;

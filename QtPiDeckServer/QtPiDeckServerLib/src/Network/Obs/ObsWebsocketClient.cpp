@@ -50,19 +50,19 @@ ObsWebsocketClient::ObsWebsocketClient(
           using namespace Utilities::literals;
           BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
               << "Failed to check authorization(" << obj.error.value().toStdString() << ")";
-          m_authorized = false;
+          m_authorizationStatus = AuthorizationStatus::NonAuthorized;
           return;
         }
 
-        m_authorized = !obj.authRequired;
+        m_authorizationStatus = obj.authRequired ? AuthorizationStatus::NonAuthorized : AuthorizationStatus::Authorized;
       },
       Bus::ObsMessages::GetAuthRequiredResponseReceived);
 }
 
 void ObsWebsocketClient::connectToObs() noexcept {
   using namespace Utilities::literals;
-  m_authorized.reset();
-  const auto obsAddress = [settings = service<Services::IServerSettingsStorage>(), protocol = WebSocketProtocol] {
+  m_authorizationStatus = AuthorizationStatus::Unchecked;
+  const auto obsAddress = [settings = service<Services::IServerSettingsStorage>(), protocol = WebSocketProtocol]() noexcept {
     return settings ? "%1%2:%3"_qls.arg(protocol, settings->obsWebsocketAddress(), settings->obsWebsocketPort())
                     : "%1%2"_qls.arg(protocol, DefaultAddress);
   }();
@@ -110,7 +110,7 @@ void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
     return boost::algorithm::any_of_equal(allowedRequests, id);
   };
 
-  if (m_authorized && !*m_authorized && isNotAllowedWithoutAuthorization(requestId)) {
+  if (m_authorizationStatus == AuthorizationStatus::NonAuthorized && isNotAllowedWithoutAuthorization(requestId)) {
     BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
         << "Refused to send request " << RequestTypesRaw.at(requestId) << " without authorization";
     return;
