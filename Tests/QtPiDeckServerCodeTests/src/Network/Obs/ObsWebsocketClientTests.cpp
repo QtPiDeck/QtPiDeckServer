@@ -150,4 +150,21 @@ CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
       QtPiDeck::Network::Obs::General::GetAuthReqired)]}));
 }
 
+class FailedWebSocket final : public NoopWebSocket {
+public:
+  void setFailHandler(FailHandler failHandler) noexcept final { m_failHandler = failHandler; }
+  void emitError() { m_failHandler(ConnectionError::RefusedConnection); }
+
+private:
+  FailHandler m_failHandler;
+};
+
+CT_BOOST_AUTO_TEST_CASE(fail) {
+  auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new FailedWebSocket());
+  auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
+      std::shared_ptr<QtPiDeck::Services::IMessageBus>(new NoopMessageBus), nullptr, nullptr, webSocket);
+
+  std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError();
+}
+
 CT_BOOST_AUTO_TEST_SUITE_END()
