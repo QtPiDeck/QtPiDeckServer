@@ -39,12 +39,7 @@ ObsWebsocketClient::ObsWebsocketClient(
   m_authResponseReceived = service<Services::IMessageBus>()->subscribe(
       this,
       [this](const Bus::Message& message) noexcept {
-        const auto obj = Models::GetAuthRequiredResponse::fromJson([&message]() noexcept {
-          QDataStream qbs{message.payload};
-          QString jsonText;
-          qbs >> jsonText;
-          return jsonText;
-        }());
+        const auto obj = Models::GetAuthRequiredResponse::fromJson(QString{message.payload});
 
         if (!isRequestSuccessful(obj)) {
           using namespace Utilities::literals;
@@ -70,32 +65,25 @@ void ObsWebsocketClient::connectToObs() noexcept {
   service<Services::IWebSocket>()->connect(obsAddress);
 }
 
-void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) {
+void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) noexcept {
   BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
       << "Connection error: " << QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error);
 }
 
 void ObsWebsocketClient::receivedMessage(QByteArray message) {
-  auto convertMessage = [&message] {
-    QByteArray qba;
-    QDataStream qds{&qba, QIODevice::WriteOnly};
-    qds << message;
-    return qba;
-  };
-
   using namespace Utilities::literals;
 
   if (const auto obj = QJsonDocument::fromJson(message).object(); obj.contains("update-type"_qls)) {
-    // to be implemented
+    throw std::logic_error("Not implemented");
   } else {
     const auto& id = obj["message-id"_qls].toString();
-    service<Services::IMessageBus>()->sendMessage({m_pendingResponses.at(id), convertMessage()});
+    service<Services::IMessageBus>()->sendMessage({m_pendingResponses.at(id), message});
     m_pendingResponses.erase(id);
   }
 }
 
 void ObsWebsocketClient::checkAuthRequirement() {
-  sendRequest(General::GetAuthReqired, Bus::ObsMessages::GetAuthRequiredResponseReceived);
+  sendRequest(General::GetAuthRequired, Bus::ObsMessages::GetAuthRequiredResponseReceived);
 }
 
 void ObsWebsocketClient::sendRequest(uint16_t requestId, Bus::ObsMessages callbackMessageId) noexcept {
@@ -106,7 +94,7 @@ void ObsWebsocketClient::sendRequest(uint16_t requestId, Bus::ObsMessages callba
 void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
                               Bus::ObsMessages callbackMessageId) noexcept {
   auto isNotAllowedWithoutAuthorization = [](uint16_t id) noexcept {
-    constexpr std::array allowedRequests = {static_cast<uint16_t>(General::GetAuthReqired)};
+    constexpr std::array allowedRequests = {static_cast<uint16_t>(General::GetAuthRequired)};
     return boost::algorithm::any_of_equal(allowedRequests, id);
   };
 

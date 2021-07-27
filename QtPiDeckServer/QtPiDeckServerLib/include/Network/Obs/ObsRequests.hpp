@@ -12,7 +12,7 @@
 #include <QString>
 
 namespace QtPiDeck::Network::Obs {
-enum class General : uint16_t { GetAuthReqired, End };
+enum class General : uint16_t { GetAuthRequired, End };
 enum class MediaControl : uint16_t { PlayPauseMedia = static_cast<uint16_t>(General::End), End };
 using ObsRequest = std::variant<General, MediaControl>;
 

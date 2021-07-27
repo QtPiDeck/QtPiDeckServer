@@ -39,8 +39,10 @@ public:
   }
   void sendRequest(uint16_t requestId, Bus::ObsMessages callbackMessageId) noexcept;
 
+  auto isAuthorized() -> bool { return m_authorizationStatus == AuthorizationStatus::Authorized; }
+
 public slots: // NOLINT(readability-redundant-access-specifiers)
-  void webSocketError(QAbstractSocket::SocketError error);
+  void webSocketError(QAbstractSocket::SocketError error) noexcept;
   void receivedMessage(QByteArray message);
   void checkAuthRequirement();
 

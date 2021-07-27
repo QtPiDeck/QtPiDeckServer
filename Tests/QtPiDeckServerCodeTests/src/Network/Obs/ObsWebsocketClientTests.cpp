@@ -5,6 +5,9 @@
 #include "Utilities/Literals.hpp"
 #include "Utilities/Logging.hpp"
 
+#include <boost/test/data/monomorphic.hpp>
+#include <boost/test/data/test_case.hpp>
+
 auto main(int argc, char* argv[]) -> int {
   QtPiDeck::Utilities::initLogging("ObsWebsocketClientTests");
   return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
@@ -115,16 +118,19 @@ private:
 class ConnectedWebSocket final : public NoopWebSocket {
 public:
   void setConnectedHandler(ConnectedHandler handler) noexcept final { m_handler = handler; }
+  void setMessageReceivedHandler(MessageReceivedHandler handler) noexcept final { m_receivedHandler = handler; }
   auto send(QByteArray message) noexcept -> std::optional<SendingError> final {
     m_data = message;
     m_message = QLatin1String{m_data};
     return {};
   }
+  void received(QByteArray data) { m_receivedHandler(data); }
   void connected() { m_handler(); }
   [[nodiscard]] auto message() const -> QLatin1String { return m_message; }
 
 private:
   ConnectedHandler m_handler;
+  MessageReceivedHandler m_receivedHandler;
   QLatin1String m_message;
   QByteArray m_data;
 };
@@ -136,7 +142,9 @@ public:
   [[nodiscard]] auto generateId(const QString& /*requestName*/) const noexcept -> QString final { return {}; }
 };
 
-CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
+BOOST_DATA_TEST_CASE(askAuthAfterConnect, // NOLINT
+                     boost::unit_test::data::make(true, false) ^ boost::unit_test::data::make(false, true), required,
+                     result) {
   auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new ConnectedWebSocket());
   auto messageBus = std::shared_ptr<QtPiDeck::Services::IMessageBus>(new SimpleMessageBus());
   auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
@@ -147,24 +155,97 @@ CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnect) {
   auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
   casted->connected();
   CT_BOOST_TEST(casted->message().contains(QLatin1String{QtPiDeck::Network::Obs::RequestTypesRaw[static_cast<uint16_t>(
-      QtPiDeck::Network::Obs::General::GetAuthReqired)]}));
+      QtPiDeck::Network::Obs::General::GetAuthRequired)]}));
+
+  const auto json = [&]() {
+    using namespace QtPiDeck::Network::Obs::Models;
+    QJsonObject obj;
+    obj[GetAuthRequiredResponse::statusField] = GetAuthRequiredResponse::successStatus;
+    obj[GetAuthRequiredResponse::authRequiredField] = required;
+    return QJsonDocument{obj}.toJson();
+  }();
+
+  casted->received(json);
+  CT_BOOST_TEST(client->isAuthorized() == result);
+}
+
+CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnectUnsuccessfulResponse) {
+  auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new ConnectedWebSocket());
+  auto messageBus = std::shared_ptr<QtPiDeck::Services::IMessageBus>(new SimpleMessageBus());
+  auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
+      messageBus, std::shared_ptr<QtPiDeck::Services::IServerSettingsStorage>(),
+      std::shared_ptr<QtPiDeck::Services::IObsMessageIdGenerator>(new NoopObsMessageIdGenerator()), webSocket);
+
+  client->connectToObs();
+  auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
+  casted->connected();
+  CT_BOOST_TEST(casted->message().contains(QLatin1String{QtPiDeck::Network::Obs::RequestTypesRaw[static_cast<uint16_t>(
+      QtPiDeck::Network::Obs::General::GetAuthRequired)]}));
+
+  const auto json = [&]() {
+    using namespace QtPiDeck::Network::Obs::Models;
+    QJsonObject obj;
+    obj[GetAuthRequiredResponse::statusField] = "error"_qs;
+    obj[GetAuthRequiredResponse::errorField] = "Some error"_qs;
+    return QJsonDocument{obj}.toJson();
+  }();
+
+  casted->received(json);
+  CT_BOOST_TEST(!client->isAuthorized());
+}
+
+CT_BOOST_AUTO_TEST_CASE(receiveUpdateMessage) {
+  auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new ConnectedWebSocket());
+  auto messageBus = std::shared_ptr<QtPiDeck::Services::IMessageBus>(new SimpleMessageBus());
+  auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
+      messageBus, std::shared_ptr<QtPiDeck::Services::IServerSettingsStorage>(),
+      std::shared_ptr<QtPiDeck::Services::IObsMessageIdGenerator>(new NoopObsMessageIdGenerator()), webSocket);
+
+  client->connectToObs();
+  auto casted = std::dynamic_pointer_cast<ConnectedWebSocket>(webSocket);
+  casted->connected();
+  CT_BOOST_TEST(casted->message().contains(QLatin1String{QtPiDeck::Network::Obs::RequestTypesRaw[static_cast<uint16_t>(
+      QtPiDeck::Network::Obs::General::GetAuthRequired)]}));
+
+  const auto json = [&]() {
+    using namespace QtPiDeck::Network::Obs::Models;
+    QJsonObject obj;
+    obj[GetAuthRequiredResponse::statusField] = GetAuthRequiredResponse::successStatus;
+    obj["update-type"_qls] = "Random"_qs;
+    return QJsonDocument{obj}.toJson();
+  }();
+
+  BOOST_CHECK_THROW(casted->received(json), std::logic_error); // NOLINT
 }
 
 class FailedWebSocket final : public NoopWebSocket {
 public:
   void setFailHandler(FailHandler failHandler) noexcept final { m_failHandler = failHandler; }
-  void emitError() { m_failHandler(ConnectionError::RefusedConnection); }
+  void emitError(ConnectionError error) { m_failHandler(error); }
 
 private:
   FailHandler m_failHandler;
 };
 
-CT_BOOST_AUTO_TEST_CASE(fail) {
+CT_BOOST_AUTO_TEST_CASE(handleFailedWebsocket) {
   auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new FailedWebSocket());
   auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
       std::shared_ptr<QtPiDeck::Services::IMessageBus>(new NoopMessageBus), nullptr, nullptr, webSocket);
 
-  std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError();
+  std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(
+      QtPiDeck::Services::IWebSocket::ConnectionError::RefusedConnection);
+}
+
+CT_BOOST_AUTO_TEST_CASE(crashIfUnhandledError) {
+  auto webSocket = std::shared_ptr<QtPiDeck::Services::IWebSocket>(new FailedWebSocket());
+  auto client = std::make_unique<QtPiDeck::Network::Obs::ObsWebsocketClient>(
+      std::shared_ptr<QtPiDeck::Services::IMessageBus>(new NoopMessageBus), nullptr, nullptr, webSocket);
+
+  constexpr auto wrongError = static_cast<QtPiDeck::Services::IWebSocket::ConnectionError>(
+      static_cast<uint32_t>(QtPiDeck::Services::IWebSocket::ConnectionError::Unspecified) + 1);
+
+  BOOST_CHECK_THROW(std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(wrongError),
+                    std::out_of_range); // NOLINT
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()
