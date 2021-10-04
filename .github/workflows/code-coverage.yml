@@ -26,6 +26,7 @@ jobs:
         id: cache-qt
         uses: actions/cache@v1
         with:
+          modules: qtwebsockets
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.cfg.qt }}
 
@@ -55,7 +56,7 @@ jobs:
           sudo apt update
           sudo apt install
           sudo apt install vulkan-sdk libxkbcommon-dev -y
-        if: matrix.cfg.qt == '6.1.1'
+        if: matrix.cfg.qt == '6.2.0'
 
       - name: Get vcpkg package list and cache key
         run: |
