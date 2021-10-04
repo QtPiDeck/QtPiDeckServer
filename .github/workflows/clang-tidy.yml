@@ -16,7 +16,7 @@ jobs:
       matrix:
         cfg:
         - { os: ubuntu-20.04, qt: 5.15.2, cc: clang-11, cxx: clang++-11, vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.1, cc: clang-11, cxx: clang++-11, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.2.0, cc: clang-11, cxx: clang++-11, vcpkgtriplet: x64-linux }
 
     name: Qt${{ matrix.cfg.qt }} - ${{ matrix.cfg.cc }}[${{ matrix.cfg.os }}]
     continue-on-error: true

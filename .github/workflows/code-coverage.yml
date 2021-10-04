@@ -16,7 +16,7 @@ jobs:
       matrix:
         cfg:
         - { os: ubuntu-20.04, qt: 5.15.2, cc: gcc-10, cxx: g++-10, experimental: false, vcpkgtriplet: x64-linux }
-        - { os: ubuntu-20.04, qt: 6.1.1, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
+        - { os: ubuntu-20.04, qt: 6.2.0, cc: gcc-10, cxx: g++-10, experimental: true, vcpkgtriplet: x64-linux }
 
     name: code coverage [Qt${{ matrix.cfg.qt }}]
     continue-on-error: ${{ matrix.cfg.experimental }}

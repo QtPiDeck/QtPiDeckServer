@@ -3,15 +3,11 @@
 #include <QCoreApplication>
 #include <QQuickStyle>
 
+#include "Network/Obs/ObsRequests.hpp"
 #include "Services/MessageBus.hpp"
 #include "Services/ObsMessageIdGenerator.hpp"
 #include "Services/SettingsStorage.hpp"
-#if QT_VERSION_MAJOR == 6
-#include "Services/WebSocketpp.hpp"
-#else
 #include "Services/WebSocketQt.hpp"
-#endif
-#include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
@@ -41,11 +37,7 @@ void ServerApplication::initialPreparations() {
   ioc().registerSingleton<Services::IMessageBus>(std::make_shared<Services::MessageBus>(nullptr));
   ioc().registerService<Services::IServerSettingsStorage, Services::SettingsStorage>();
   ioc().registerService<Services::IObsMessageIdGenerator, Services::ObsMessageIdGenerator>();
-#if QT_VERSION_MAJOR == 6
-  ioc().registerService<Services::IWebSocket, Services::WebSocketpp>();
-#else
   ioc().registerService<Services::IWebSocket, Services::WebSocketQt>();
-#endif
 
 #if QT_VERSION_MAJOR < 6
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

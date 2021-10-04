@@ -93,12 +93,12 @@ void ObsWebsocketClient::sendRequest(uint16_t requestId, Bus::ObsMessages callba
 
 void ObsWebsocketClient::send(uint16_t requestId, const QString& messageId,
                               Bus::ObsMessages callbackMessageId) noexcept {
-  auto isNotAllowedWithoutAuthorization = [](uint16_t id) noexcept {
+  auto isNotAllowedWithoutAuthorization = [requestId]() noexcept {
     constexpr std::array allowedRequests = {static_cast<uint16_t>(General::GetAuthRequired)};
-    return boost::algorithm::any_of_equal(allowedRequests, id);
+    return boost::algorithm::any_of_equal(allowedRequests, requestId);
   };
 
-  if (m_authorizationStatus == AuthorizationStatus::NonAuthorized && isNotAllowedWithoutAuthorization(requestId)) {
+  if (m_authorizationStatus == AuthorizationStatus::NonAuthorized && isNotAllowedWithoutAuthorization()) {
     BOOST_LOG_SEV(m_slg, Utilities::severity::warning)
         << "Refused to send request " << RequestTypesRaw.at(requestId) << " without authorization";
     return;
