@@ -42,7 +42,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          aqtversion: 2.0.0
+          aqtversion: ==2.0.0
           modules: qtwebsockets
           version: '${{ matrix.cfg.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
