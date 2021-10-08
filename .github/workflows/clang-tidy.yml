@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-qt-${{ matrix.cfg.qt }}
+          key: ${{ runner.os }}-QtCache-${{ matrix.cfg.qt }}-2
 
       - uses: actions/checkout@v2
         with:
@@ -39,6 +39,8 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
+          aqtversion: 2.0.0
+          modules: qtwebsockets
           version: '${{ matrix.cfg.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
