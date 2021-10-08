@@ -68,7 +68,7 @@ CT_BOOST_AUTO_TEST_CASE(initWithSettingsStorage) {
 CT_BOOST_AUTO_TEST_CASE(saveSettings) {
   auto settingsStorage = std::shared_ptr<IServerSettingsStorage>(new TestServerSettingsStorage());
   SettingsViewModel settingsViewModel{nullptr, settingsStorage};
-  const std::array values{"1.1.1.1"_qs, "2000"_qs, "3.3.3.3"_qs, "4000"_qs};
+  const std::vector<QString> values{"1.1.1.1"_qs, "2000"_qs, "3.3.3.3"_qs, "4000"_qs};
   settingsViewModel.setDeckServerAddress(values[0]);
   settingsViewModel.setDeckServerPort(values[1]);
   settingsViewModel.setObsWebsocketAddress(values[2]);
