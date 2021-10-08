@@ -26,7 +26,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
 endif()
 
 message(STATUS "Performing Test HAVE_CXX20RANGES")
-try_compile(CXX20RANGES ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/try_compile/ranges.cpp)
+try_compile(CXX20RANGES ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/try_compile/ranges.cpp CXX_STANDARD 20)
 if (CXX20RANGES)
     message(STATUS "Performing Test HAVE_CXX20RANGES - Success")
 else()
