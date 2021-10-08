@@ -31,7 +31,7 @@ if (CXX20RANGES)
     message(STATUS "Performing Test HAVE_CXX20RANGES - Success")
 else()
     message(STATUS "Performing Test HAVE_CXX20RANGES - Fail")
-    message(STATUS "range-v3 will be used")
+    message(STATUS "nanorange will be used")
 endif()
 
 # concepts

@@ -56,9 +56,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 endif()
 
 if(NOT CXX20RANGES)
-    find_package(range-v3 CONFIG REQUIRED)
-    target_link_libraries(QtPiDeckServerLib PUBLIC range-v3 range-v3-meta range-v3::meta range-v3-concepts)
-    target_compile_definitions(QtPiDeckServerLib PUBLIC RANGESV3)
+    find_path(NANORANGE_INCLUDE_DIRS "nanorange.hpp")
+    target_include_directories(QtPiDeckServerLib PUBLIC ${NANORANGE_INCLUDE_DIRS})
+    target_compile_definitions(QtPiDeckServerLib PUBLIC NANORANGE)
 endif()
 
 get_target_property(QtPiDeckCommon_SOURCE_DIR QtPiDeckCommon SOURCE_DIR)
