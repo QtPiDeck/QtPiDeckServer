@@ -70,12 +70,12 @@ void ObsWebsocketClient::webSocketError(QAbstractSocket::SocketError error) noex
       << "Connection error: " << QMetaEnum::fromType<QAbstractSocket::SocketError>().valueToKey(error);
 }
 
-void ObsWebsocketClient::receivedMessage(QByteArray message) {
+void ObsWebsocketClient::receivedMessage(const QByteArray& message) {
   using namespace Utilities::literals;
 
   if (const auto obj = QJsonDocument::fromJson(message).object(); obj.contains("update-type"_qls)) {
     throw std::logic_error("Not implemented");
-  } else {
+  } else { // NOLINT(readability-else-after-return)
     const auto& id = obj["message-id"_qls].toString();
     service<Services::IMessageBus>()->sendMessage({m_pendingResponses.at(id), message});
     m_pendingResponses.erase(id);

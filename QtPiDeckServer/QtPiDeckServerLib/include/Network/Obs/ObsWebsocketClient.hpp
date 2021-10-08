@@ -43,7 +43,7 @@ public:
 
 public slots: // NOLINT(readability-redundant-access-specifiers)
   void webSocketError(QAbstractSocket::SocketError error) noexcept;
-  void receivedMessage(QByteArray message);
+  void receivedMessage(const QByteArray& message);
   void checkAuthRequirement();
 
 private:

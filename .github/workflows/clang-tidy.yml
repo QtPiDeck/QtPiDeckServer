@@ -94,7 +94,7 @@ jobs:
           grep '\.cpp$' |
           xargs -P2 -I% bash -c 'v=%; grep -q -e ".*\"file\":.*%" build/compile_commands.json && clang-tidy-11 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
 
-      - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
+      - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \;
 
       - run: echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
         id: reports-number
