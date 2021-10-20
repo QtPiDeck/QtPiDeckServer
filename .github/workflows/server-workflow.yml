@@ -32,11 +32,11 @@ jobs:
         path: ../Qt
         key: ${{ matrix.os }}-QtCache-${{ matrix.qt }}
 
-    - name: Install Qt6
+    - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         aqtversion: ==2.0.0
-        modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
+        # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
         version: '${{ matrix.qt }}'
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
