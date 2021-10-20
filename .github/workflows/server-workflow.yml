@@ -23,7 +23,7 @@ jobs:
     needs: [generator]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
-      matrix: ${{fromJSON(jobs.generator.outputs.job-matrix)}}
+      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
     steps:
     - name: Cache Qt
       id: cache-qt
@@ -41,10 +41,10 @@ jobs:
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
   test:
-    needs: [qt-cache]
+    needs: [generator, qt-cache]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
-      matrix: ${{fromJSON(jobs.generator.outputs.job-matrix)}}
+      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
     steps:
       - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
 
