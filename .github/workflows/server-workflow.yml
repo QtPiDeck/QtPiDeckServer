@@ -1,0 +1,17 @@
+name: Server workflow
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ${{ format('{0}-latest', matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu, windows, macos]
+        qt: [5.15.2, 6.1.1]
+    steps:
+        - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
