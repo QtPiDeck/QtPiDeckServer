@@ -63,8 +63,8 @@ jobs:
         id: triplet-step
         shell: bash
         run: |
-          declare -A triplets=( ["macos"]="osx" ["ubuntu"]="linux" ["windows"]="windows")
-          echo "::set-output name=triplet::${triplets[${{ matrix.os }}]}"
+          triplet=$(python -c '{"macos":"osx", "ubuntu":"linux", "windows":"windows"}[${{ matrix.os }}]')
+          echo "::set-output name=triplet::${triplet}"
 
       - uses: lukka/run-vcpkg@v7.3
         with:
