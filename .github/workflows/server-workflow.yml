@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ format('{0}-latest', matrix.os }}
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix:
         os: [ubuntu, windows, macos]
