@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, windows, macos]
-        qt: ${{ fromJSON(format('[{0}, {1}]', env.QT5, env.QT6)) }}
+        qt: ${{ fromJSON(format('[{0}, {1}]', QT5, QT6)) }}
     steps:
       - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
       - run: echo ${{ github.event_name }}
