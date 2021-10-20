@@ -11,12 +11,18 @@ env:
   QT6: 6.1.1
 
 jobs:
+  generator:
+    runs-on: ubuntu-latest
+    outputs:
+      job-matrix: ${{ steps.set-matrix.outputs.job-matrix }}
+    steps:
+      - id: set-matrix
+        run: echo "::set-output name=job-matrix::{\"os\":[\"ubuntu\",\"windows\",\"macos\"],\"qt\":[\"${{ env.QT5 }}\",\"${{ env.QT6 }}\"]}"
   test:
+    needs: [generator]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
-      matrix:
-        os: [ubuntu, windows, macos]
-        qt: ${{ fromJSON(format('[{0}, {1}]', QT5, QT6)) }}
+      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
     steps:
       - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
       - run: echo ${{ github.event_name }}
