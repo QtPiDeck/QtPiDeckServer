@@ -39,9 +39,44 @@ jobs:
         # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
         version: '${{ matrix.qt }}'
         cached: ${{ steps.cache-qt.outputs.cache-hit }}
+  
+  vcpkg-cache:
+    needs: [generator]
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
+    strategy:
+      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+
+      - name: Get vcpkg package list and cache key
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ${{ matrix.os }})"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ${{ matrix.os }})"
+        id: vcpkgPackages
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - name: Get triplet
+        id: triplet-step
+        shell: bash
+        run: |
+          declare -A triplets=( ["macos"]="osx" ["ubuntu"]="linux" ["windows"]="windows")
+          echo "::set-output name=triplet::${triplets[${{ matrix.os }}]}"
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.vcpkgPackages.outputs.cacheKey }}
+          vcpkgTriplet: ${{ steps.triplet-step.output.triplet }}
+          vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
 
   test:
-    needs: [generator, qt-cache]
+    needs: [generator, qt-cache, vcpkg-cache]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
