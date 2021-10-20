@@ -19,33 +19,27 @@ jobs:
       - id: set-matrix
         run: echo "::set-output name=job-matrix::{\"os\":[\"ubuntu\",\"windows\",\"macos\"],\"qt\":[\"${{ env.QT5 }}\",\"${{ env.QT6 }}\"]}"
 
-  qt-cache:
+  test:
     needs: [generator]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
     steps:
-    - name: Cache Qt
-      id: cache-qt
-      uses: actions/cache@v1
-      with:
-        path: ../Qt
-        key: ${{ matrix.os }}-QtCache-${{ matrix.qt }}
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ matrix.os }}-QtCache-${{ matrix.qt }}
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          aqtversion: ==2.0.0
+          # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
+          version: '${{ matrix.qt }}'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        aqtversion: ==2.0.0
-        # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
-        version: '${{ matrix.qt }}'
-        cached: ${{ steps.cache-qt.outputs.cache-hit }}
-  
-  vcpkg-cache:
-    needs: [generator]
-    runs-on: ${{ format('{0}-latest', matrix.os) }}
-    strategy:
-      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
-    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
@@ -74,14 +68,6 @@ jobs:
           vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
-
-  test:
-    needs: [generator, qt-cache, vcpkg-cache]
-    runs-on: ${{ format('{0}-latest', matrix.os) }}
-    strategy:
-      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
-    steps:
-      - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
 
   clang-tidy:
     if: github.event_name == 'pull_request'
