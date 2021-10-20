@@ -60,7 +60,7 @@ jobs:
         id: triplet-step
         shell: bash
         run: |
-          triplet=$(python -c '{"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"]')
+          triplet=$(python -c 'print({"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"])')
           echo "::set-output name=triplet::${triplet}"
 
       - uses: lukka/run-vcpkg@v7.3
@@ -76,8 +76,8 @@ jobs:
         id: compilators
         shell: bash
         run: |
-          cc=$(python -c '{"macos":"/usr/local/opt/llvm/bin/clang", "ubuntu":"gcc-10", "windows":"cl"}["${{ matrix.os }}"]')
-          cxx=$(python -c '{"macos":"/usr/local/opt/llvm/bin/clang++", "ubuntu":"g++-10", "windows":"cl"}["${{ matrix.os }}"]')
+          cc=$(python -c 'print({"macos":"/usr/local/opt/llvm/bin/clang", "ubuntu":"gcc-10", "windows":"cl"}["${{ matrix.os }}"])')
+          cxx=$(python -c 'print({"macos":"/usr/local/opt/llvm/bin/clang++", "ubuntu":"g++-10", "windows":"cl"}["${{ matrix.os }}"])')
           echo "::set-output name=cc::${cc}"
           echo "::set-output name=cxx::${cxx}"
 
