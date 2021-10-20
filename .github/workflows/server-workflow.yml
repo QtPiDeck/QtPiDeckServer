@@ -78,7 +78,7 @@ jobs:
         run: |
           cc=$(python -c 'print({"macos":"/usr/local/opt/llvm/bin/clang", "ubuntu":"gcc-10", "windows":"cl"}["${{ matrix.os }}"])')
           cxx=$(python -c 'print({"macos":"/usr/local/opt/llvm/bin/clang++", "ubuntu":"g++-10", "windows":"cl"}["${{ matrix.os }}"])')
-          echo "${cc} ${cxx}"
+          echo "${cc} ${cxx} ${{ steps.triplet-step.output.triplet }}"
           echo "::set-output name=cc::${cc}"
           echo "::set-output name=cxx::${cxx}"
 
