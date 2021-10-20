@@ -6,12 +6,23 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  QT5: 5.15.2
+  QT6: 6.1.1
+
 jobs:
   test:
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix:
         os: [ubuntu, windows, macos]
-        qt: [5.15.2, 6.1.1]
+        qt: ${{ fromJSON('[ QT5, QT6 ]') }}
     steps:
-        - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
+      - run: echo 'Hello ${{ matrix.os }} with Qt ${{ matrix.qt }}'
+
+  clang-tidy:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - run: "Second job"
