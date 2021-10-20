@@ -24,6 +24,9 @@ jobs:
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
+    env:
+      VULKAN_VER: 1.2.189
+      VULKAN_VER_FULL: 1.2.189.0
     steps:
       - name: Cache Qt
         id: cache-qt
@@ -56,9 +59,7 @@ jobs:
       - name: Get triplet
         id: triplet-step
         shell: bash
-        run: |
-          triplet=$(python -c '{"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"]')
-          echo "::set-output name=triplet::${triplet}"
+        run: echo "::set-output name=triplet::$(python -c '{"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"]')"
 
       - uses: lukka/run-vcpkg@v7.3
         with:
@@ -68,6 +69,70 @@ jobs:
           vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+
+      - name: Get compilator path
+        id: compilators
+        shell: bash
+        run: |
+          echo "::set-output name=cc::$(python -c '{"macos":"/usr/local/opt/llvm/bin/clang", "ubuntu":"gcc-10", "windows":"cl"}[${{ matrix.os }}]')"
+          echo "::set-output name=cxx::$(python -c '{"macos":"/usr/local/opt/llvm/bin/clang++", "ubuntu":"g++-10", "windows":"cl"}[${{ matrix.os }}]')"
+
+      - name: Update llvm-clang
+        run: |
+          brew update
+          brew upgrade llvm
+        if: matrix.os == 'macos'
+
+      - name: Install additional Qt6 dependencies
+        run: |
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-${VULKAN_VER}-focal.list https://packages.lunarg.com/vulkan/${VULKAN_VER}/lunarg-vulkan-${VULKAN_VER}-focal.list
+          sudo apt update
+          sudo apt install
+          sudo apt install vulkan-sdk libxkbcommon-dev -y
+        if: matrix.os == 'ubuntu' && matrix.qt == env.QT6
+
+      - name: Cache Vulkan
+        id: cache-vulkan
+        uses: actions/cache@v1
+        with:
+          path: C:\VulkanSDK\${{ env.VULKAN_VER_FULL }}
+          key: vulkan-${{ env.VULKAN_VER_FULL }}
+        if: matrix.os == 'windows' && matrix.qt == env.QT6
+
+      - name: Setup Vulkan(windows)
+        run: |
+           Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${env:VULKAN_VER_FULL}/windows/VulkanSDK-${env:VULKAN_VER_FULL}-Installer.exe" -OutFile VulkanSDK.exe
+           $installer = Start-Process -FilePath VulkanSDK.exe -Wait -PassThru -ArgumentList @("/S");
+           $installer.WaitForExit();
+        if: matrix.os == 'windows' && matrix.qt == env.QT6 && !steps.cache-vulkan.outputs.cache-hit
+
+      - name: Set vulkan sdk variable(windows)
+        run: echo "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VER_FULL}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        if: matrix.os == 'windows' && matrix.qt == env.QT6
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Create build directory
+        run: cmake -E make_directory "build"
+
+      - run: cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
+        env:
+          CC: ${{ steps.compilators.output.cc }}
+          CXX: ${{ steps.compilators.output.cxx }}
+
+      - run: cmake --build build
+
+      - name: Set path to QtPiDeckCommon library
+        run: Get-Location | % { echo "$_\QtPiDeckCommon\QtPiDeckCommon" } | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        working-directory: build
+        if: matrix.os == 'windows'
+
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
 
   clang-tidy:
     if: github.event_name == 'pull_request'
