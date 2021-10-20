@@ -58,10 +58,7 @@ jobs:
 
       - name: Get triplet
         id: triplet-step
-        shell: bash
-        run: |
-          triplet=$(python -c 'print({"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"])')
-          echo "::set-output name=triplet::${triplet}"
+        run: echo "::set-output name=triplet::x64-"$(python -c 'print({"macos":"osx", "ubuntu":"linux", "windows":"windows"}["${{ matrix.os }}"])')
 
       - uses: lukka/run-vcpkg@v7.3
         with:
