@@ -58,7 +58,9 @@ jobs:
 
       - name: Get triplet
         id: triplet-step
-        run: echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ${{ matrix.os }})"
+        run: |
+          python3 ${{ github.workspace }}/scripts/triplet.py ${{ matrix.os }}
+          echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ${{ matrix.os }})"
 
       - uses: lukka/run-vcpkg@v7.3
         with:
