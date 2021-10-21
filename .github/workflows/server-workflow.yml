@@ -64,7 +64,7 @@ jobs:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
           appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
           vcpkgTriplet: ${{ steps.set-outputs.output.triplet }}
-          vcpkgArguments: ${{ steps.vcpkgPackages.outputs.dependencies }}
+          vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
 
