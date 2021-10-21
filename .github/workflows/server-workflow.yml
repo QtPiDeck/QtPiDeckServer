@@ -71,7 +71,7 @@ jobs:
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
           appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
-          vcpkgTriplet: ${{ steps.set-outputs.output.triplet }}
+          vcpkgTriplet: ${{ steps.set-outputs.outputs.triplet }}
           vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
@@ -120,8 +120,8 @@ jobs:
 
       - run: cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
         env:
-          CC: ${{ steps.set-outputs.output.cc }}
-          CXX: ${{ steps.set-outputs.output.cxx }}
+          CC: ${{ steps.set-outputs.outputs.cc }}
+          CXX: ${{ steps.set-outputs.outputs.cxx }}
 
       - run: cmake --build build
 
