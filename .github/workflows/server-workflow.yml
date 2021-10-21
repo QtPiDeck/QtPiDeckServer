@@ -51,7 +51,7 @@ jobs:
       - name: Set outputs
         run: |
           echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ${{ matrix.os }}-latest)"
-          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ${{ matrix.os }}-latest)"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ${{ matrix.os }}-latest)."
           echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ${{ matrix.os }})"
           echo "::set-output name=cc::$(python3 ${{ github.workspace }}/scripts/cc.py ${{ matrix.os }})"
           echo "::set-output name=cxx::$(python3 ${{ github.workspace }}/scripts/cxx.py ${{ matrix.os }})"
