@@ -59,6 +59,14 @@ jobs:
         env:
           PYTHONPATH: ./QtPiDeckCommon/scripts/
 
+      - name: Check outputs
+        run: |
+          echo "dependencies=${{ steps.set-outputs.output.dependencies }}"
+          echo "cacheKey=${{ steps.set-outputs.output.cacheKey }}"
+          echo "triplet=${{ steps.set-outputs.output.triplet }}"
+          echo "cc=${{ steps.set-outputs.output.cc }}"
+          echo "cxx=${{ steps.set-outputs.output.cxx }}"
+
       - uses: lukka/run-vcpkg@v7.3
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
