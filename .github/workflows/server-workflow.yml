@@ -61,11 +61,11 @@ jobs:
 
       - name: Check outputs
         run: |
-          echo "dependencies=${{ steps.set-outputs.output.dependencies }}"
-          echo "cacheKey=${{ steps.set-outputs.output.cacheKey }}"
-          echo "triplet=${{ steps.set-outputs.output.triplet }}"
-          echo "cc=${{ steps.set-outputs.output.cc }}"
-          echo "cxx=${{ steps.set-outputs.output.cxx }}"
+          echo "dependencies=${{ steps.set-outputs.outputs.dependencies }}"
+          echo "cacheKey=${{ steps.set-outputs.outputs.cacheKey }}"
+          echo "triplet=${{ steps.set-outputs.outputs.triplet }}"
+          echo "cc=${{ steps.set-outputs.outputs.cc }}"
+          echo "cxx=${{ steps.set-outputs.outputs.cxx }}"
 
       - uses: lukka/run-vcpkg@v7.3
         with:
