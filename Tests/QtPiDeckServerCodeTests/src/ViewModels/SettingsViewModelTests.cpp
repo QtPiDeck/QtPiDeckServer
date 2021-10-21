@@ -5,6 +5,8 @@
 #include "Utilities/Logging.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
+#include <array>
+
 #include "SignalCatcher.hpp"
 
 auto main(int argc, char* argv[]) -> int {
