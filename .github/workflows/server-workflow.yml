@@ -198,12 +198,12 @@ jobs:
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
 
-      - run: sudo apt-get install -y clang-tidy-13 clang-13
+      - run: sudo apt-get install -y clang-tidy-12 clang-12
 
       - run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         env:
-          CC: clang-13
-          CXX: clang-13
+          CC: clang-12
+          CXX: clang++-12
         
       - run: cmake --build build
 
@@ -213,7 +213,7 @@ jobs:
         run: | 
           git diff --name-only $(git merge-base origin/master HEAD) HEAD | 
           grep '\.cpp$' |
-          xargs -P2 -I% bash -c 'v=%; grep -q -e ".*\"file\":.*%" build/compile_commands.json && clang-tidy-13 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
+          xargs -P2 -I% bash -c 'v=%; grep -q -e ".*\"file\":.*%" build/compile_commands.json && clang-tidy-12 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
 
       - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
 
