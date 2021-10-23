@@ -59,6 +59,13 @@ target_link_libraries(QtPiDeckServerLib
 
 set_warnings_flags(QtPiDeckServerLib)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" 
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "13" 
+   AND Boost_VERSION_STRING VERSION_EQUAL "1.76") # change boost comparison if needed
+   message(STATUS "BOOST_ASIO_HAS_STD_INVOKE_RESULT is set to 1")
+   target_compile_definitions(QtPiDeckServerLib PUBLIC BOOST_ASIO_HAS_STD_INVOKE_RESULT=1)
+endif()
+
 if(CODECOV AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(QtPiDeckServerLib PUBLIC --coverage)
     target_link_options(QtPiDeckServerLib PUBLIC --coverage)

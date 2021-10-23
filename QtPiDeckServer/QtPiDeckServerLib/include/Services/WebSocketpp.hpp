@@ -2,22 +2,6 @@
 
 #include <thread>
 
-#if defined(__clang__)
-static_assert(__cplusplus >= 201103);
-#if __has_include(<__config>)
-#include <__config>
-#if defined(_LIBCPP_VERSION)
-/* #ifndef BOOST_ASIO_HAS_CLANG_LIBCXX
-#error "No BOOST_ASIO_HAS_CLANG_LIBCXX"
-#endif*/
-#else
-#error "No _LIBCPP_VERSION"
-#endif
-#else
-#error "No __config header"
-#endif
-#endif
-
 #include <boost/asio/detail/config.hpp>
 
 #include <websocketpp/client.hpp>
