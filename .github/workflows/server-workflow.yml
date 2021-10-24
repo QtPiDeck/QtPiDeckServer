@@ -149,6 +149,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
+    env:
+      clangversion: 11
     steps:
       - name: Cache Qt
         id: cache-qt
@@ -198,15 +200,15 @@ jobs:
 
       - uses: lukka/get-cmake@latest
 
-      - run: sudo apt-get install -y clang-tidy-12 clang-12
+      - run: sudo apt-get install -y clang-tidy-${clangversion} clang-${clangversion}
 
       - name: Create build directory
         run: cmake -E make_directory "build"
 
       - run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         env:
-          CC: clang-12
-          CXX: clang++-12
+          CC: clang-${{ env.clangversion }}
+          CXX: clang++-${{ env.clangversion }}
 
       - run: mkdir clang-tidy-reports
 
@@ -214,7 +216,7 @@ jobs:
         run: | 
           git diff --name-only $(git merge-base origin/master HEAD) HEAD | 
           grep '\.cpp$' |
-          xargs -P2 -I% bash -c 'v=%; grep -q -e ".*\"file\":.*%" build/compile_commands.json && clang-tidy-12 -p build % > clang-tidy-reports/${v//\//.}.txt || true'
+          xargs -P2 -I% bash -c 'v=%; grep -q -e ".*\"file\":.*%" build/compile_commands.json && clang-tidy-${clangversion} -p build % > clang-tidy-reports/${v//\//.}.txt || true'
 
       - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
 
