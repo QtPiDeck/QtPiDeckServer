@@ -135,8 +135,7 @@ jobs:
         env:
           LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
 
-  clang-tidy-generator:
-    if: github.event_name == 'pull_request'
+  code-checks-generator:
     runs-on: ubuntu-latest
     outputs:
       job-matrix: ${{ steps.set-matrix.outputs.job-matrix }}
@@ -146,7 +145,7 @@ jobs:
 
   clang-tidy:
     if: github.event_name == 'pull_request'
-    needs: [clang-tidy-generator, test]
+    needs: [code-checks-generator, test]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.clang-tidy-generator.outputs.job-matrix)}}
@@ -234,7 +233,91 @@ jobs:
             core.setFailed('clang-tidy detected errors. Check job artifacts')
 
   code-coverage:
+    needs: [code-checks-generator, test]
     runs-on: ubuntu-latest
-    needs: [test]
+    strategy:
+      matrix: ${{fromJSON(needs.clang-tidy-generator.outputs.job-matrix)}}
     steps:
-      - run: echo "code-coverage"
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ubuntu-QtCache-${{ matrix.qt }}
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          aqtversion: ==2.0.0
+          # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
+          version: '${{ matrix.qt }}'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+
+      - name: Set outputs
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ubuntu-latest)"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ubuntu-latest)."
+          echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ubuntu)"
+        id: set-outputs
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - name: Check outputs
+        run: |
+          echo "dependencies=${{ steps.set-outputs.outputs.dependencies }}"
+          echo "cacheKey=${{ steps.set-outputs.outputs.cacheKey }}"
+          echo "triplet=${{ steps.set-outputs.outputs.triplet }}"
+          echo "cc=${{ steps.set-outputs.outputs.cc }}"
+          echo "cxx=${{ steps.set-outputs.outputs.cxx }}"
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
+          vcpkgTriplet: ${{ steps.set-outputs.outputs.triplet }}
+          vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Run cmake
+        run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug
+        working-directory: build
+        env:
+          CC: gcc-10
+          CXX: g++-10
+
+      - run: cmake --build build
+
+      - name: Install lcov
+        run: sudo apt update && sudo apt install -y lcov
+
+      - name: Initial lcov run
+        run: lcov --rc lcov_branch_coverage=1 --no-external --capture --initial --directory . --output-file before.txt
+
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
+
+      - name: Post-test lcov run
+        run: lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.txt
+
+      - name: Merge lcov reports
+        run: |
+            lcov --rc lcov_branch_coverage=1 --add-tracefile before.txt --add-tracefile coverage.txt --output-file coverage.txt
+            rm before.txt
+
+      - name: Clean up report
+        run: lcov --rc lcov_branch_coverage=1 --remove coverage.txt -o coverage.txt '/usr/*' '*/Tests/*' '*/build/*' '*boost*' '*QtPiDeckCommon*'
+
+      - uses: codecov/codecov-action@v1
+        with:
+          functionalities: "fix" 
