@@ -218,12 +218,8 @@ jobs:
 
       - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
 
-      - run: |
-          find clang-tidy-reports -name '*.txt' | wc -l
-          echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
+      - run: echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
         id: reports-number
-
-      - run: echo "reports:${{ steps.reports-number.outputs.count }}"
 
       - name: Export report
         uses: actions/upload-artifact@v2
