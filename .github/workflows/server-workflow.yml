@@ -8,7 +8,7 @@ on:
 
 env:
   QT5: 5.15.2
-  QT6: 6.1.1
+  QT6: 6.2.0
   VULKAN_VER: 1.2.189
   VULKAN_VER_FULL: 1.2.189.0
 
@@ -38,7 +38,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           aqtversion: ==2.0.0
-          # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
+          modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
           version: '${{ matrix.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
@@ -161,7 +161,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           aqtversion: ==2.0.0
-          # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
+          modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
           version: '${{ matrix.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
@@ -252,7 +252,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           aqtversion: ==2.0.0
-          # modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }} # to be enabled with QT6.2
+          modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
           version: '${{ matrix.qt }}'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
