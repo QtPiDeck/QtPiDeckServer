@@ -148,7 +148,7 @@ jobs:
     needs: [code-checks-generator, test]
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJSON(needs.clang-tidy-generator.outputs.job-matrix)}}
+      matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
     steps:
       - name: Cache Qt
         id: cache-qt
@@ -236,7 +236,7 @@ jobs:
     needs: [code-checks-generator, test]
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJSON(needs.clang-tidy-generator.outputs.job-matrix)}}
+      matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
     steps:
       - name: Cache Qt
         id: cache-qt
