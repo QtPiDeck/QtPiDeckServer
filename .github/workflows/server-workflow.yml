@@ -218,7 +218,9 @@ jobs:
 
       - run: find clang-tidy-reports -name '*.txt' -empty -exec rm -v {} \; 
 
-      - run: echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
+      - run: |
+          find clang-tidy-reports -name '*.txt' | wc -l
+          echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
         id: reports-number
 
       - run: echo "reports:${{ steps.reports-number.outputs.count }}"
