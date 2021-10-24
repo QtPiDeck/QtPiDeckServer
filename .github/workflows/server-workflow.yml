@@ -137,7 +137,6 @@ jobs:
 
   clang-tidy-generator:
     if: github.event_name == 'pull_request'
-    needs: [test]
     runs-on: ubuntu-latest
     outputs:
       job-matrix: ${{ steps.set-matrix.outputs.job-matrix }}
@@ -147,7 +146,7 @@ jobs:
 
   clang-tidy:
     if: github.event_name == 'pull_request'
-    needs: [clang-tidy-generator]
+    needs: [clang-tidy-generator, test]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.clang-tidy-generator.outputs.job-matrix)}}
@@ -206,8 +205,6 @@ jobs:
         env:
           CC: clang-12
           CXX: clang++-12
-        
-      - run: cmake --build build
 
       - run: mkdir clang-tidy-reports
 
