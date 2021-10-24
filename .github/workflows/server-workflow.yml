@@ -200,6 +200,9 @@ jobs:
 
       - run: sudo apt-get install -y clang-tidy-12 clang-12
 
+      - name: Create build directory
+        run: cmake -E make_directory "build"
+
       - run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         env:
           CC: clang-12
@@ -286,9 +289,11 @@ jobs:
 
       - uses: lukka/get-cmake@latest
 
+      - name: Create build directory
+        run: cmake -E make_directory "build"
+
       - name: Run cmake
-        run: cmake .. -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug
-        working-directory: build
+        run:  cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug
         env:
           CC: gcc-10
           CXX: g++-10
