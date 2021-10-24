@@ -221,6 +221,8 @@ jobs:
       - run: echo ::set-output name=count::$(find clang-tidy-reports -name '*.txt' | wc -l)
         id: reports-number
 
+      - run: echo "reports:${{ steps.reports-number.outputs.count }}"
+
       - name: Export report
         uses: actions/upload-artifact@v2
         with:
@@ -229,7 +231,7 @@ jobs:
         if: steps.reports-number.outputs.count != 0
 
       - name: Fail if clang-tidy found something
-        if: ${{ steps.reports-number.outputs.count != 0 }}
+        if: steps.reports-number.outputs.count != 0
         uses: actions/github-script@v3
         with:
           script: |
