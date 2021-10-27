@@ -150,7 +150,7 @@ jobs:
     strategy:
       matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
     env:
-      clangversion: 11
+      clangversion: 12
     steps:
       - name: Cache Qt
         id: cache-qt

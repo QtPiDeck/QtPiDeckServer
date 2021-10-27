@@ -1,7 +1,7 @@
 ---
 Checks:          'clang-diagnostic-*,clang-analyzer-*,-*,bugprone-*,cert-dcl21-cpp,cert-dcl50-cpp,cert-env33-c,cert-err34-c,cert-err52-cpp,cert-err60-cpp,cert-flp30-c,cert-msc50-cpp,cert-msc51-cpp,clang-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,portability-*,readability-*'
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '.*QtPiDeckServer.*'
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
 CheckOptions:
