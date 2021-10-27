@@ -2,7 +2,8 @@
 
 #include <array>
 #include <cstdint>
-#if defined(RANGESV3)
+#if defined(NANORANGE)
+#include "nanorange.hpp"
 #else
 #include <algorithm>
 #endif
@@ -20,12 +21,12 @@ inline constexpr std::array RequestTypesRaw = {"GetAuthRequired"};
 namespace detail {
 inline auto typesRawToQString() noexcept {
   std::array<QString, RequestTypesRaw.size()> ret;
-#if defined(RANGESV3)
-  std::transform(std::cbegin(RequestTypesRaw), std::cend(RequestTypesRaw), std::begin(ret),
-                 [](const char* text) { return QString(text); });
+#if defined(NANORANGE)
+  namespace ranges = nano;
 #else
-  std::ranges::transform(RequestTypesRaw, std::begin(ret), [](const char* text) { return QString(text); });
+  namespace ranges = std::ranges;
 #endif
+  ranges::transform(RequestTypesRaw, std::begin(ret), [](const char* text) { return QString(text); });
   return ret;
 }
 }
