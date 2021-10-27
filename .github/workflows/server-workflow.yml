@@ -228,7 +228,7 @@ jobs:
       - name: Export report
         uses: actions/upload-artifact@v2
         with:
-          name: clang-tidy-reports
+          name: clang-tidy-reports-{{ matrix.qt }}
           path: clang-tidy-reports
         if: steps.reports-number.outputs.count != 0
 
