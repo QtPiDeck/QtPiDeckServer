@@ -210,6 +210,8 @@ jobs:
           CC: clang-${{ env.clangversion }}
           CXX: clang++-${{ env.clangversion }}
 
+      - run: cmake --build build
+
       - run: mkdir clang-tidy-reports
 
       - name: Generate reports
