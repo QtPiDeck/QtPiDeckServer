@@ -25,13 +25,20 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${QT_VERSION_MAJOR} EQUAL 6)
     add_compile_options(-Wno-invalid-offsetof)
 endif()
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/ext-include")
+
 message(STATUS "Performing Test HAVE_CXX20RANGES")
 try_compile(CXX20RANGES ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/try_compile/ranges.cpp)
 if (CXX20RANGES)
     message(STATUS "Performing Test HAVE_CXX20RANGES - Success")
 else()
     message(STATUS "Performing Test HAVE_CXX20RANGES - Fail")
-    message(STATUS "range-v3 will be used")
+    message(STATUS "nanorange will be used")
+    if (NOT EXISTS "${CMAKE_BINARY_DIR}/ext-include/nanorange")
+        file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/ext-include/nanorange")
+        file(DOWNLOAD "https://raw.githubusercontent.com/tcbrindle/NanoRange/master/single_include/nanorange.hpp" "${CMAKE_BINARY_DIR}/ext-include/nanorange/nanorange.hpp")
+    endif()
+    set(NANORANGE_DIR "${CMAKE_BINARY_DIR}/ext-include/nanorange")
 endif()
 
 # concepts
