@@ -1,13 +1,5 @@
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core)
-
-# temporal solution while waiting for Qt6::WebSockets
-if (${QT_VERSION_MAJOR} EQUAL 5)
-    find_package(QT NAMES Qt5 COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
-    find_package(Qt5 COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
-else()
-    find_package(QT NAMES Qt6 COMPONENTS Quick Network QuickControls2 REQUIRED)
-    find_package(Qt6 COMPONENTS Quick Network QuickControls2 REQUIRED)
-endif()
+find_package(QT NAMES Qt5 Qt6 COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick Network WebSockets QuickControls2 REQUIRED)
 
 find_package(Boost REQUIRED)
 
@@ -17,8 +9,7 @@ add_library(QtPiDeckServerLib STATIC
     src/Network/Obs/ObsWebsocketClient.cpp
     src/Network/Obs/ObsObjectsParsing.cpp
     src/Services/SettingsStorage.cpp
-    $<$<EQUAL:${QT_VERSION_MAJOR},5>:src/Services/WebSocketQt.cpp>
-    $<$<EQUAL:${QT_VERSION_MAJOR},6>:src/Services/WebSocketpp.cpp>
+    src/Services/WebSocketQt.cpp
     src/ViewModels/SettingsViewModel.cpp
     include/ServerApplication.hpp
     include/Bus/ObsMessages.hpp
@@ -31,8 +22,7 @@ add_library(QtPiDeckServerLib STATIC
     include/Services/IObsMessageIdGenerator.hpp
     include/Services/IServerSettingsStorage.hpp
     include/Services/IWebSocket.hpp
-    $<$<EQUAL:${QT_VERSION_MAJOR},5>:include/Services/WebSocketQt.hpp>
-    $<$<EQUAL:${QT_VERSION_MAJOR},6>:include/Services/WebSocketpp.hpp>
+    include/Services/WebSocketQt.hpp
     include/Services/ObsMessageIdGenerator.hpp
     include/Services/SettingsStorage.hpp
     include/ViewModels/SettingsViewModel.hpp
@@ -42,17 +32,12 @@ add_library(QtPiDeckServerLib STATIC
 target_include_directories(QtPiDeckServerLib
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-if (${QT_VERSION_MAJOR} EQUAL 6)
-    find_package(websocketpp CONFIG REQUIRED)
-endif()
-
 target_link_libraries(QtPiDeckServerLib
     PUBLIC
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::QuickControls2
-    $<$<EQUAL:${QT_VERSION_MAJOR},5>:Qt5::WebSockets>
-    $<$<EQUAL:${QT_VERSION_MAJOR},6>:websocketpp::websocketpp>
+    Qt${QT_VERSION_MAJOR}::WebSockets
     Boost::headers
     QtPiDeckCommon
     QtDefinitions)
