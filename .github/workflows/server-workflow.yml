@@ -210,6 +210,8 @@ jobs:
           CC: clang-${{ env.clangversion }}
           CXX: clang++-${{ env.clangversion }}
 
+      - run: cmake --build build
+
       - run: mkdir clang-tidy-reports
 
       - name: Generate reports
@@ -226,7 +228,7 @@ jobs:
       - name: Export report
         uses: actions/upload-artifact@v2
         with:
-          name: clang-tidy-reports
+          name: clang-tidy-reports-{{ matrix.qt }}
           path: clang-tidy-reports
         if: steps.reports-number.outputs.count != 0
 
