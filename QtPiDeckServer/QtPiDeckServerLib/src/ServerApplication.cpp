@@ -3,11 +3,12 @@
 #include <QCoreApplication>
 #include <QQuickStyle>
 
+#include "Network/DeckServer.inl"
+#include "Network/Obs/ObsRequests.hpp"
 #include "Services/MessageBus.hpp"
 #include "Services/ObsMessageIdGenerator.hpp"
 #include "Services/SettingsStorage.hpp"
 #include "Services/WebSocketQt.hpp"
-#include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 

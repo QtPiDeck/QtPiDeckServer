@@ -19,6 +19,7 @@ add_server_cpp_test(GetAuthRequiredResponseTests src/Network/Obs/Models/GetAuthR
 add_server_cpp_test(ObsObjectsParsingTests src/Network/Obs/ObsObjectsParsingTests.cpp)
 add_server_cpp_test(SettingsViewModelTests src/ViewModels/SettingsViewModelTests.cpp)
 target_link_libraries(SettingsViewModelTests PRIVATE CodeTestsUtils)
+add_server_cpp_test(DeckServerTests src/Network/DeckServerTests.cpp)
 
 # visual studio test manager requires to have these libs in PATH
 # so we just copy required libs to test binary
