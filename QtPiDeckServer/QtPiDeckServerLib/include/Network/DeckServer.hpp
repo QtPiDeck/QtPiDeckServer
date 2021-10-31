@@ -8,7 +8,7 @@
 #include <boost/log/attributes/constant.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "Application.hpp"
+#include "Services/UseServices.hpp"
 #include "Network/MessageHeader.hpp"
 #include "Services/IMessageBus.hpp"
 #include "Utilities/Logging.hpp"
