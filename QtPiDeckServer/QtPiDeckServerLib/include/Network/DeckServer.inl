@@ -63,7 +63,7 @@ void writeObject(const T& object, Socket* socket) {
 }*/
 
 template<class Derived, class TcpServer, class TcpSocket>
-void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Message& message) {
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Message& /*message*/) {
   /*const auto requestId = [&message]() noexcept {
     QString value;
     QDataStream qds{message.payload};
