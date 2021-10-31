@@ -31,8 +31,6 @@ protected:
   [[nodiscard]] auto server() -> TcpServer& { return m_server; }
   [[nodiscard]] auto server() const -> const TcpServer& { return m_server; }
 
-  mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;
-
 private:
   void connectToNewConnectionServerSignal();
   void handleConnection();
@@ -43,6 +41,8 @@ private:
   std::optional<QMetaObject::Connection> m_serverConnection{};
   TcpServer m_server{};
   TcpSocket* m_socket{};
+
+  mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;
 };
 }
 

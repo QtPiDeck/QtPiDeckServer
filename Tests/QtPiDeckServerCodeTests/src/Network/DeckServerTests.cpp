@@ -98,8 +98,8 @@ CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
   server.start();
   auto& tcpServer = server.getServer();
   tcpServer.emitNewConnection();
-  BOOST_TEST(server.currentConnection() != nullptr);
-  BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
+  CT_BOOST_TEST(server.currentConnection() != nullptr);
+  CT_BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()
