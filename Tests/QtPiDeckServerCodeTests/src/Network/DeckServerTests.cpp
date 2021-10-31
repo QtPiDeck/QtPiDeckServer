@@ -1,9 +1,6 @@
 #define BOOST_TEST_MODULE DeckServerTests // NOLINT
 #include "BoostUnitTest.hpp"
 
-#if defined(WIN32)
-#define NOMINMAX
-#endif
 #include "Network/DeckServer.inl"
 #include "Utilities/Literals.hpp"
 #include "Utilities/Logging.hpp"
