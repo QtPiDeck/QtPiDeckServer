@@ -17,12 +17,12 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::start() {
   subscribeToUtilityMessages();
 
   // default port and address will be in global config
-  /*constexpr qint16 defaultPort = 13000;
+  constexpr qint16 defaultPort = 13000;
   if (!m_server.listen(QHostAddress::LocalHost, defaultPort)) {
     BOOST_LOG_SEV(m_slg, Utilities::severity::warning) << "Failed to start TcpServer";
   }
 
-  BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Server setup completed";*/
+  BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Server setup completed";
 }
 
 template<class Derived, class TcpServer, class TcpSocket>
