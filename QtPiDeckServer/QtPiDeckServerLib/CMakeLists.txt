@@ -14,6 +14,7 @@ add_library(QtPiDeckServerLib STATIC
     include/ServerApplication.hpp
     include/Bus/ObsMessages.hpp
     include/Network/DeckServer.hpp
+    include/Network/DeckServer.inl
     include/Network/Obs/Models/GetAuthRequiredResponse.hpp
     include/Network/Obs/ObsObjectsParsing.hpp
     include/Network/Obs/ObsRequests.hpp

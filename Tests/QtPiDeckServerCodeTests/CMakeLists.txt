@@ -4,6 +4,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 add_executable(QtPiDeckServerCodeTests
     src/main.cpp
     src/Services/ObsMessageIdGeneratorTests.cpp
+    src/Network/DeckServerTests.cpp
     src/Network/Obs/ObsWebsocketClientTests.cpp
     src/Network/Obs/Models/GetAuthRequiredResponseTests.cpp
     src/Network/Obs/ObsObjectsParsingTests.cpp
