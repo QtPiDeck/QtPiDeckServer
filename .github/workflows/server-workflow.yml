@@ -205,7 +205,7 @@ jobs:
       - name: Create build directory
         run: cmake -E make_directory "build"
 
-      - run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - run: cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         env:
           CC: clang-${{ env.clangversion }}
           CXX: clang++-${{ env.clangversion }}
@@ -228,7 +228,7 @@ jobs:
       - name: Export report
         uses: actions/upload-artifact@v2
         with:
-          name: clang-tidy-reports-{{ matrix.qt }}
+          name: clang-tidy-reports-${{ matrix.qt }}
           path: clang-tidy-reports
         if: steps.reports-number.outputs.count != 0
 
