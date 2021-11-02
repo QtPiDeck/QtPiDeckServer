@@ -3,15 +3,15 @@
 namespace QtPiDeck::Network::detail {
 
 template<class Derived, class TcpServer, class TcpSocket>
-DeckServerPrivate<Derived, TcpServer, TcpSocket>::DeckServerPrivate(QObject* parent,
-                                                         std::shared_ptr<Services::IMessageBus> messageBus)
+DeckServerPrivate<Derived, TcpServer, TcpSocket>::DeckServerPrivate(
+    QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus) noexcept
     : QObject(parent) {
   setService(std::move(messageBus));
   Utilities::initLogger(m_slg, "DeckServer");
 }
 
 template<class Derived, class TcpServer, class TcpSocket>
-void DeckServerPrivate<Derived, TcpServer, TcpSocket>::start() {
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::start() noexcept {
   connectToNewConnectionServerSignal();
 
   subscribeToUtilityMessages();
@@ -41,7 +41,7 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::subscribeToUtilityMessage
 }
 
 template<class Derived, class TcpServer, class TcpSocket>
-void DeckServerPrivate<Derived, TcpServer, TcpSocket>::handleConnection() {
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::handleConnection() noexcept {
   BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "New client";
   // only one connection at the same time
   disconnect(*m_serverConnection);

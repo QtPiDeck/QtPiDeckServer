@@ -21,8 +21,8 @@ namespace detail {
 template<class Derived, class TcpServer = QTcpServer, class TcpSocket = QTcpSocket>
 class DeckServerPrivate : public QObject, public Services::UseServices<Services::IMessageBus> {
 public:
-  explicit DeckServerPrivate(QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus);
-  void start();
+  DeckServerPrivate(QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus) noexcept;
+  void start() noexcept;
 
   [[nodiscard]] auto currentConnection() -> TcpSocket* { return m_socket; }
   [[nodiscard]] auto currentConnection() const -> const TcpSocket* { return m_socket; }
@@ -33,7 +33,7 @@ protected:
 
 private:
   void connectToNewConnectionServerSignal();
-  void handleConnection();
+  void handleConnection() noexcept;
   void subscribeToUtilityMessages();
   void sendPong(const Bus::Message& message);
 
