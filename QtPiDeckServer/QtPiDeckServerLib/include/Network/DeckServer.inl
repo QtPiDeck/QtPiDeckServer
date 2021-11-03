@@ -77,7 +77,7 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Messa
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::processMessage(
     const QtPiDeck::Network::MessageHeader& header) noexcept {
-  auto sendMessage = [this](DeckMessages messageType, QString requestId) {
+  auto sendMessage = [this](DeckMessages messageType, const QString& requestId) {
     QByteArray payload;
     QDataStream qds{&payload, QIODevice::WriteOnly};
     qds << requestId;

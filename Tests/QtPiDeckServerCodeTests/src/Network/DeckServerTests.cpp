@@ -68,18 +68,17 @@ private:
   std::vector<uint64_t> m_subscribedTypes{};
 };
 namespace common {
-class TcpSocket : public QIODevice {
+class TcpSocket final : public QIODevice {
   Q_OBJECT // NOLINT
 public:
   void emitDisconnected() { emit disconnected(); }
   void emitReadyRead() { emit readyRead(); }
   void flush() {}
-  qint64 writeData(const char* /*src*/, qint64 /*size*/) { return {};
-  }
-  qint64 readData(char* /*dst*/, qint64 /*size*/) { return {}; }
+  auto writeData(const char* /*src*/, qint64 /*size*/) -> qint64 final { return {}; }
+  auto readData(char* /*dst*/, qint64 /*size*/) -> qint64 final { return {}; }
 signals:
   void disconnected();
-  //void readyRead();
+  // void readyRead();
 };
 class TcpServer : public QObject {
   Q_OBJECT // NOLINT
