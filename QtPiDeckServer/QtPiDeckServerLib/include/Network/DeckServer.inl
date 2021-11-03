@@ -1,5 +1,7 @@
 #include "DeckServer.hpp"
 
+#include "Network/DeckDataStream.hpp"
+
 namespace QtPiDeck::Network::detail {
 
 template<class Derived, class TcpServer, class TcpSocket>
@@ -27,9 +29,8 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::start() noexcept {
 
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::connectToNewConnectionServerSignal() {
-  if (m_serverConnection) {
-    disconnect(*m_serverConnection);
-  }
+  // until multiple connections feature is supported
+  assert(!m_serverConnection.has_value()); // LCOV_EXCL_LINE // NOLINT
 
   m_serverConnection = connect(&m_server, &TcpServer::newConnection, this, &DeckServerPrivate::handleConnection);
 }
@@ -47,11 +48,10 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::handleConnection() noexce
   disconnect(*m_serverConnection);
   m_serverConnection.reset();
   m_socket = m_server.nextPendingConnection();
-  /*connect(m_socket, &QTcpSocket::disconnected, this, &DeckServer::connectToNewConnectionServerSignal);
-  connect(m_socket, &QTcpSocket::readyRead, this, &DeckServer::readData);*/
+  connect(m_socket, &TcpSocket::disconnected, this, &DeckServerPrivate::connectToNewConnectionServerSignal);
+  connect(m_socket, &TcpSocket::readyRead, this, &DeckServerPrivate::readData);
 }
 
-/*namespace {
 template<class T, class Socket>
 void writeObject(const T& object, Socket* socket) {
   QByteArray tmp;
@@ -60,18 +60,59 @@ void writeObject(const T& object, Socket* socket) {
   outStream << object;
   socket->write(tmp);
 }
-}*/
 
 template<class Derived, class TcpServer, class TcpSocket>
-void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Message& /*message*/) {
-  /*const auto requestId = [&message]() noexcept {
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Message& message) {
+  const auto requestId = [&message]() noexcept {
     QString value;
     QDataStream qds{message.payload};
     qds >> value;
     return value;
   }();
-  qDebug() << "Sending pong" << requestId;
+  BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Sending pong" << requestId.toStdString();
   writeObject(getEmptyMessageHeader(MessageType::Pong, requestId), m_socket);
-  m_socket->flush();*/
+  m_socket->flush();
 }
+
+template<class Derived, class TcpServer, class TcpSocket>
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::processMessage(
+    const QtPiDeck::Network::MessageHeader& header) noexcept {
+  auto sendMessage = [this](DeckMessages messageType, QString requestId) {
+    QByteArray payload;
+    QDataStream qds{&payload, QIODevice::WriteOnly};
+    qds << requestId;
+    service<Services::IMessageBus>()->sendMessage(Bus::Message{messageType, payload});
+  };
+  switch (header.messageType) {
+  case QtPiDeck::Network::MessageType::Ping:
+    BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Got ping" << header.requestId.toStdString();
+    sendMessage(DeckMessages::PingReceived, header.requestId);
+    break;
+  default:
+    BOOST_LOG_SEV(m_slg, Utilities::severity::warning) << "Unhandled message";
+    break;
+  }
+}
+template<class T, class TSocket>
+auto readObject(TSocket* socket) -> std::optional<T> {
+  DeckDataStream inStream{socket};
+  T object{};
+
+  inStream.startTransaction();
+  inStream >> object;
+  if (inStream.commitTransaction()) {
+    return object;
+  }
+
+  return std::nullopt;
+}
+template<class Derived, class TcpServer, class TcpSocket>
+void DeckServerPrivate<Derived, TcpServer, TcpSocket>::readData() {
+  const auto header = readObject<QtPiDeck::Network::MessageHeader>(m_socket);
+
+  if (header) {
+    processMessage(*header);
+  }
+}
+
 }

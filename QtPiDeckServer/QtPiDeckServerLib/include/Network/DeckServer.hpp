@@ -36,6 +36,8 @@ private:
   void handleConnection() noexcept;
   void subscribeToUtilityMessages();
   void sendPong(const Bus::Message& message);
+  void processMessage(const QtPiDeck::Network::MessageHeader& header) noexcept;
+  void readData();
 
   Utilities::Connection m_pingConnection{};
   std::optional<QMetaObject::Connection> m_serverConnection{};

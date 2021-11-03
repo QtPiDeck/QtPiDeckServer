@@ -68,7 +68,19 @@ private:
   std::vector<uint64_t> m_subscribedTypes{};
 };
 namespace common {
-class TcpSocket {};
+class TcpSocket : public QIODevice {
+  Q_OBJECT // NOLINT
+public:
+  void emitDisconnected() { emit disconnected(); }
+  void emitReadyRead() { emit readyRead(); }
+  void flush() {}
+  qint64 writeData(const char* /*src*/, qint64 /*size*/) { return {};
+  }
+  qint64 readData(char* /*dst*/, qint64 /*size*/) { return {}; }
+signals:
+  void disconnected();
+  //void readyRead();
+};
 class TcpServer : public QObject {
   Q_OBJECT // NOLINT
 public:
@@ -133,10 +145,6 @@ CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
   auto messageBus = std::make_shared<start::TrackableMessageBus>();
   auto server = start::failure::DeckServerImpl(nullptr, messageBus);
   server.start();
-  auto& tcpServer = server.getServer();
-  tcpServer.emitNewConnection();
-  CT_BOOST_TEST(server.currentConnection() != nullptr);
-  CT_BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

@@ -3,7 +3,6 @@
 #include <QCoreApplication>
 #include <QQuickStyle>
 
-#include "Network/DeckServer.inl"
 #include "Network/Obs/ObsRequests.hpp"
 #include "Services/MessageBus.hpp"
 #include "Services/ObsMessageIdGenerator.hpp"
