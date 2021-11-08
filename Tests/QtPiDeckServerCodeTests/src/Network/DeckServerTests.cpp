@@ -77,7 +77,7 @@ class TcpSocket final : public QIODevice {
 public:
   void emitDisconnected() { emit disconnected(); }
   void emitReadyRead() { emit readyRead(); }
-  void flush() {}
+  void flush() { ++m_flushCalls; }
   auto writeData(const char* /*src*/, qint64 /*size*/) -> qint64 final { return {}; }
   auto readData(char* /*dst*/, qint64 /*size*/) -> qint64 final { return {}; }
 signals:
