@@ -133,9 +133,8 @@ CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
   CT_BOOST_TEST(messageBus.get() == serviceInServer.get());
 }
 
-CT_BOOST_AUTO_TEST_SUITE_END()
 
-CT_BOOST_FIXTURE_TEST_SUITE(DeckServer, Fixture)
+CT_BOOST_FIXTURE_TEST_SUITE(ServerListenFailure, Fixture)
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
   auto server = DeckServerImplFailure(nullptr, messageBus);
@@ -144,7 +143,7 @@ CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
 
 CT_BOOST_AUTO_TEST_SUITE_END()
 
-CT_BOOST_FIXTURE_TEST_SUITE(DeckServer, FixtureSuccess)
+CT_BOOST_FIXTURE_TEST_SUITE(ServerListenSuccess, FixtureSuccess)
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
   auto& tcpServer = server.getServer();
@@ -170,6 +169,7 @@ CT_BOOST_AUTO_TEST_CASE(handleConnectionShouldSetCurrentConnectionSocket) {
   CT_BOOST_TEST(server.currentConnection() != nullptr);
 }
 
+CT_BOOST_AUTO_TEST_SUITE_END()
 CT_BOOST_AUTO_TEST_SUITE_END()
 
 #include "DeckServerTests.moc"
