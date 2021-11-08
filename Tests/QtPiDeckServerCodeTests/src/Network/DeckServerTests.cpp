@@ -10,8 +10,6 @@ auto main(int argc, char* argv[]) -> int {
   return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
 }
 
-CT_BOOST_AUTO_TEST_SUITE(DeckServer)
-
 using QtPiDeck::Bus::Message;
 using QtPiDeck::Network::DeckMessages;
 using QtPiDeck::Network::detail::DeckServerPrivate;
@@ -19,7 +17,6 @@ using QtPiDeck::Services::IMessageBus;
 using QtPiDeck::Utilities::Connection;
 
 namespace {
-namespace common {
 class EmptyIMessageBusImpl : public IMessageBus {
 public:
   auto subscribe(QObject* /*context*/, const std::function<void(const Message&)>& /*method*/) noexcept
@@ -33,28 +30,8 @@ public:
   void unsubscribe(Connection& /*connection*/) noexcept override {}
   void sendMessage(Message /*message*/) noexcept override {}
 };
-}
-namespace constructor {
-class DeckServerImpl : public DeckServerPrivate<DeckServerImpl> {
-  friend DeckServerPrivate<DeckServerImpl>;
-  using DeckServerPrivate<DeckServerImpl>::DeckServerPrivate;
 
-public:
-  auto getService() noexcept -> std::shared_ptr<IMessageBus> { return service<IMessageBus>(); }
-};
-}
-}
-
-CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
-  auto messageBus = std::make_shared<common::EmptyIMessageBusImpl>();
-  auto server = constructor::DeckServerImpl(nullptr, messageBus);
-  auto serviceInServer = server.getService();
-  CT_BOOST_TEST(messageBus.get() == serviceInServer.get());
-}
-
-namespace {
-namespace start {
-class TrackableMessageBus : public DeckServer::common::EmptyIMessageBusImpl {
+class TrackableMessageBus : public EmptyIMessageBusImpl {
 public:
   auto subscribe(QObject* /*context*/, const std::function<void(const Message&)>& /*method*/,
                  uint64_t messageType) noexcept -> Connection override {
@@ -69,7 +46,15 @@ public:
 private:
   std::vector<uint64_t> m_subscribedTypes{};
 };
-namespace common {
+
+class DeckServerImpl : public DeckServerPrivate<DeckServerImpl> {
+  friend DeckServerPrivate<DeckServerImpl>;
+  using DeckServerPrivate<DeckServerImpl>::DeckServerPrivate;
+
+public:
+  auto getService() noexcept -> std::shared_ptr<IMessageBus> { return service<IMessageBus>(); }
+};
+
 class TcpSocket final : public QIODevice {
   Q_OBJECT // NOLINT
 public:
@@ -86,6 +71,7 @@ private:
   std::vector<uint64_t> m_readDataCalls{};
   std::vector<uint64_t> m_writeDataCalls{};
 };
+
 class TcpServer : public QObject {
   Q_OBJECT // NOLINT
 public:
@@ -98,30 +84,69 @@ signals:
 private:
   TcpSocket m_socket;
 };
-}
 
-namespace success {
-class TcpServer : public common::TcpServer {
+class TcpServerFailure : public TcpServer {
+public:
+  [[nodiscard]] auto listen(QHostAddress::SpecialAddress /*address*/, qint16 /*port*/) -> bool { // NOLINT
+    return false;
+  }
+};
+class DeckServerImplFailure : public DeckServerPrivate<DeckServerImpl, TcpServerFailure, TcpSocket> {
+  friend DeckServerPrivate<DeckServerImpl, TcpServerFailure, TcpSocket>;
+  using DeckServerPrivate<DeckServerImpl, TcpServerFailure, TcpSocket>::DeckServerPrivate;
+
+public:
+  [[nodiscard]] auto getServer() -> TcpServer& { return server(); }
+};
+
+class TcpServerSuccess : public TcpServer {
 public:
   [[nodiscard]] auto listen(QHostAddress::SpecialAddress /*address*/, qint16 /*port*/) -> bool { // NOLINT
     return true;
   }
 };
-class DeckServerImpl : public DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket> {
-  friend DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket>;
-  using DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket>::DeckServerPrivate;
+class DeckServerImplSuccess : public DeckServerPrivate<DeckServerImpl, TcpServerSuccess, TcpSocket> {
+  friend DeckServerPrivate<DeckServerImpl, TcpServerSuccess, TcpSocket>;
+  using DeckServerPrivate<DeckServerImpl, TcpServerSuccess, TcpSocket>::DeckServerPrivate;
 
 public:
-  [[nodiscard]] auto getServer() -> TcpServer& { return server(); }
+  [[nodiscard]] auto getServer() -> TcpServerSuccess& { return server(); }
+};
+
+struct Fixture {
+  Fixture() : messageBus(TrackableMessageBus ::create()) {}
+  std::shared_ptr<TrackableMessageBus> messageBus;
+};
+
+struct FixtureSuccess : Fixture {
+  FixtureSuccess() : Fixture(), server(nullptr, messageBus) { server.start(); }
+  DeckServerImplSuccess server;
 };
 }
-}
+
+CT_BOOST_AUTO_TEST_SUITE(DeckServer)
+
+CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
+  auto messageBus = std::make_shared<EmptyIMessageBusImpl>();
+  auto server = DeckServerImpl(nullptr, messageBus);
+  auto serviceInServer = server.getService();
+  CT_BOOST_TEST(messageBus.get() == serviceInServer.get());
 }
 
-CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
-  auto messageBus = start::TrackableMessageBus::create();
-  auto server = start::success::DeckServerImpl(nullptr, messageBus);
+CT_BOOST_AUTO_TEST_SUITE_END()
+
+CT_BOOST_FIXTURE_TEST_SUITE(DeckServer, Fixture)
+
+CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
+  auto server = DeckServerImplFailure(nullptr, messageBus);
   server.start();
+}
+
+CT_BOOST_AUTO_TEST_SUITE_END()
+
+CT_BOOST_FIXTURE_TEST_SUITE(DeckServer, FixtureSuccess)
+
+CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
   auto& tcpServer = server.getServer();
   tcpServer.emitNewConnection();
   CT_BOOST_TEST(server.currentConnection() != nullptr);
@@ -129,34 +154,7 @@ CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
   CT_BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
 }
 
-namespace {
-namespace start::failure {
-class TcpServer : public common::TcpServer {
-public:
-  [[nodiscard]] auto listen(QHostAddress::SpecialAddress /*address*/, qint16 /*port*/) -> bool { // NOLINT
-    return false;
-  }
-};
-class DeckServerImpl : public DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket> {
-  friend DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket>;
-  using DeckServerPrivate<DeckServerImpl, TcpServer, common::TcpSocket>::DeckServerPrivate;
-
-public:
-  [[nodiscard]] auto getServer() -> TcpServer& { return server(); }
-};
-}
-}
-
-CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
-  auto messageBus = start::TrackableMessageBus::create();
-  auto server = start::failure::DeckServerImpl(nullptr, messageBus);
-  server.start();
-}
-
 CT_BOOST_AUTO_TEST_CASE(shouldWorkWithOnlyOneConnection) {
-  auto messageBus = start::TrackableMessageBus::create();
-  auto server = start::success::DeckServerImpl(nullptr, messageBus);
-  server.start();
   auto& tcpServer = server.getServer();
   CT_BOOST_TEST(server.currentConnection() == nullptr);
   tcpServer.emitNewConnection();
@@ -166,9 +164,6 @@ CT_BOOST_AUTO_TEST_CASE(shouldWorkWithOnlyOneConnection) {
 }
 
 CT_BOOST_AUTO_TEST_CASE(handleConnectionShouldSetCurrentConnectionSocket) {
-  auto messageBus = start::TrackableMessageBus::create();
-  auto server = start::success::DeckServerImpl(nullptr, messageBus);
-  server.start();
   auto& tcpServer = server.getServer();
   CT_BOOST_TEST(server.currentConnection() == nullptr);
   tcpServer.emitNewConnection();
