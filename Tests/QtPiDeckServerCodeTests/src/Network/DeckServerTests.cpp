@@ -64,9 +64,7 @@ public:
 
   [[nodiscard]] auto subscribedTypes() const -> const std::vector<uint64_t>& { return m_subscribedTypes; }
 
-  static auto create() -> std::shared_ptr<TrackableMessageBus> {
-    return std::shared_ptr<TrackableMessageBus>(new TrackableMessageBus);
-  }
+  static auto create() -> std::shared_ptr<TrackableMessageBus> { return std::make_shared<TrackableMessageBus>(); }
 
 private:
   std::vector<uint64_t> m_subscribedTypes{};
@@ -162,7 +160,7 @@ CT_BOOST_AUTO_TEST_CASE(shouldWorkWithOnlyOneConnection) {
   auto& tcpServer = server.getServer();
   CT_BOOST_TEST(server.currentConnection() == nullptr);
   tcpServer.emitNewConnection();
-  auto connection = server.currentConnection();
+  auto* connection = server.currentConnection();
   tcpServer.emitNewConnection();
   CT_BOOST_TEST(server.currentConnection() == connection);
 }
