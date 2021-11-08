@@ -54,7 +54,7 @@ CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
 
 namespace {
 namespace start {
-class TrackableMessageBus : public common::EmptyIMessageBusImpl {
+class TrackableMessageBus : public DeckServer::common::EmptyIMessageBusImpl {
 public:
   auto subscribe(QObject* /*context*/, const std::function<void(const Message&)>& /*method*/,
                  uint64_t messageType) noexcept -> Connection override {
@@ -63,6 +63,10 @@ public:
   }
 
   [[nodiscard]] auto subscribedTypes() const -> const std::vector<uint64_t>& { return m_subscribedTypes; }
+
+  static auto create() -> std::shared_ptr<TrackableMessageBus> {
+    return std::shared_ptr<TrackableMessageBus>(new TrackableMessageBus);
+  }
 
 private:
   std::vector<uint64_t> m_subscribedTypes{};
@@ -78,7 +82,11 @@ public:
   auto readData(char* /*dst*/, qint64 /*size*/) -> qint64 final { return {}; }
 signals:
   void disconnected();
-  // void readyRead();
+
+private:
+  uint32_t m_flushCalls{0};
+  std::vector<uint64_t> m_readDataCalls{};
+  std::vector<uint64_t> m_writeDataCalls{};
 };
 class TcpServer : public QObject {
   Q_OBJECT // NOLINT
@@ -113,12 +121,13 @@ public:
 }
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
-  auto messageBus = std::make_shared<start::TrackableMessageBus>();
+  auto messageBus = start::TrackableMessageBus::create();
   auto server = start::success::DeckServerImpl(nullptr, messageBus);
   server.start();
   auto& tcpServer = server.getServer();
   tcpServer.emitNewConnection();
   CT_BOOST_TEST(server.currentConnection() != nullptr);
+  CT_BOOST_TEST(std::size(messageBus->subscribedTypes()) == 1);
   CT_BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
 }
 
@@ -141,9 +150,31 @@ public:
 }
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
-  auto messageBus = std::make_shared<start::TrackableMessageBus>();
+  auto messageBus = start::TrackableMessageBus::create();
   auto server = start::failure::DeckServerImpl(nullptr, messageBus);
   server.start();
+}
+
+CT_BOOST_AUTO_TEST_CASE(shouldWorkWithOnlyOneConnection) {
+  auto messageBus = start::TrackableMessageBus::create();
+  auto server = start::success::DeckServerImpl(nullptr, messageBus);
+  server.start();
+  auto& tcpServer = server.getServer();
+  CT_BOOST_TEST(server.currentConnection() == nullptr);
+  tcpServer.emitNewConnection();
+  auto connection = server.currentConnection();
+  tcpServer.emitNewConnection();
+  CT_BOOST_TEST(server.currentConnection() == connection);
+}
+
+CT_BOOST_AUTO_TEST_CASE(handleConnectionShouldSetCurrentConnectionSocket) {
+  auto messageBus = start::TrackableMessageBus::create();
+  auto server = start::success::DeckServerImpl(nullptr, messageBus);
+  server.start();
+  auto& tcpServer = server.getServer();
+  CT_BOOST_TEST(server.currentConnection() == nullptr);
+  tcpServer.emitNewConnection();
+  CT_BOOST_TEST(server.currentConnection() != nullptr);
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

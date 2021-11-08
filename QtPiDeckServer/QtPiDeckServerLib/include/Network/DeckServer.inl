@@ -30,7 +30,7 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::start() noexcept {
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::connectToNewConnectionServerSignal() {
   // until multiple connections feature is supported
-  assert(!m_serverConnection.has_value()); // LCOV_EXCL_LINE // NOLINT
+  assert(!m_serverConnection.has_value()); // LCOV_EXCL_LINE NOLINT
 
   m_serverConnection = connect(&m_server, &TcpServer::newConnection, this, &DeckServerPrivate::handleConnection);
 }
@@ -114,5 +114,4 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::readData() {
     processMessage(*header);
   }
 }
-
 }
