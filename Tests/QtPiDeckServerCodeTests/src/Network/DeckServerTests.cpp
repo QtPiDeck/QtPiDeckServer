@@ -114,13 +114,19 @@ public:
 };
 
 struct Fixture {
-  Fixture() : messageBus(TrackableMessageBus ::create()) {}
-  std::shared_ptr<TrackableMessageBus> messageBus;
+  Fixture() : m_messageBus(TrackableMessageBus ::create()) {}
+  auto messageBus() -> std::shared_ptr<TrackableMessageBus>& { return m_messageBus; }
+
+protected:
+  std::shared_ptr<TrackableMessageBus> m_messageBus;
 };
 
 struct FixtureSuccess : Fixture {
-  FixtureSuccess() : Fixture(), server(nullptr, messageBus) { server.start(); }
-  DeckServerImplSuccess server;
+  FixtureSuccess() : m_server(nullptr, m_messageBus) { m_server.start(); }
+  auto server() -> DeckServerImplSuccess& { return m_server; }
+
+protected:
+  DeckServerImplSuccess m_server;
 };
 }
 
@@ -133,11 +139,10 @@ CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
   CT_BOOST_TEST(messageBus.get() == serviceInServer.get());
 }
 
-
 CT_BOOST_FIXTURE_TEST_SUITE(ServerListenFailure, Fixture)
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerFailure) {
-  auto server = DeckServerImplFailure(nullptr, messageBus);
+  auto server = DeckServerImplFailure(nullptr, messageBus());
   server.start();
 }
 
@@ -146,27 +151,27 @@ CT_BOOST_AUTO_TEST_SUITE_END()
 CT_BOOST_FIXTURE_TEST_SUITE(ServerListenSuccess, FixtureSuccess)
 
 CT_BOOST_AUTO_TEST_CASE(startShouldInitServerSuccess) {
-  auto& tcpServer = server.getServer();
+  auto& tcpServer = server().getServer();
   tcpServer.emitNewConnection();
-  CT_BOOST_TEST(server.currentConnection() != nullptr);
-  CT_BOOST_TEST(std::size(messageBus->subscribedTypes()) == 1);
-  CT_BOOST_TEST(messageBus->subscribedTypes().at(0) == DeckMessages::PingReceived);
+  CT_BOOST_TEST(server().currentConnection() != nullptr);
+  CT_BOOST_TEST(std::size(messageBus()->subscribedTypes()) == 1);
+  CT_BOOST_TEST(messageBus()->subscribedTypes().at(0) == DeckMessages::PingReceived);
 }
 
 CT_BOOST_AUTO_TEST_CASE(shouldWorkWithOnlyOneConnection) {
-  auto& tcpServer = server.getServer();
-  CT_BOOST_TEST(server.currentConnection() == nullptr);
+  auto& tcpServer = server().getServer();
+  CT_BOOST_TEST(server().currentConnection() == nullptr);
   tcpServer.emitNewConnection();
-  auto* connection = server.currentConnection();
+  auto* connection = server().currentConnection();
   tcpServer.emitNewConnection();
-  CT_BOOST_TEST(server.currentConnection() == connection);
+  CT_BOOST_TEST(server().currentConnection() == connection);
 }
 
 CT_BOOST_AUTO_TEST_CASE(handleConnectionShouldSetCurrentConnectionSocket) {
-  auto& tcpServer = server.getServer();
-  CT_BOOST_TEST(server.currentConnection() == nullptr);
+  auto& tcpServer = server().getServer();
+  CT_BOOST_TEST(server().currentConnection() == nullptr);
   tcpServer.emitNewConnection();
-  CT_BOOST_TEST(server.currentConnection() != nullptr);
+  CT_BOOST_TEST(server().currentConnection() != nullptr);
 }
 
 CT_BOOST_AUTO_TEST_SUITE_END()

@@ -108,9 +108,7 @@ auto readObject(TSocket* socket) -> std::optional<T> {
 }
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::readData() {
-  const auto header = readObject<QtPiDeck::Network::MessageHeader>(m_socket);
-
-  if (header) {
+  if (const auto header = readObject<QtPiDeck::Network::MessageHeader>(m_socket); header.has_value()) {
     processMessage(*header);
   }
 }
