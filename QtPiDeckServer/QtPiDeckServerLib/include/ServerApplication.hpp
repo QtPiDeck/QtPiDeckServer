@@ -7,7 +7,7 @@
 namespace QtPiDeck {
 class ServerApplication final : public QtPiDeck::Application {
 protected:
-  auto mainPage() -> QUrl final;
+  auto mainPage() const -> QUrl final;
   void initialPreparations() final;
   void appCreated() final;
   void engineCreated(QQmlApplicationEngine& engine) final;

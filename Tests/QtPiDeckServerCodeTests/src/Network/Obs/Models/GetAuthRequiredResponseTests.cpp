@@ -1,18 +1,11 @@
-#define BOOST_TEST_MODULE GetAuthRequiredResponseTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/Models/GetAuthRequiredResponse.hpp"
-#include "Utilities/Logging.hpp"
 #include "Utilities/Literals.hpp"
-
-auto main(int argc, char* argv[]) -> int {
-  QtPiDeck::Utilities::initLogging("GetAuthRequiredResponseTests");
-  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
-}
 
 auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
   using namespace QtPiDeck::Utilities::literals;
-  return operator<<(ostr, right.value_or("(nil)"_qs).toStdString());
+  return operator<<(ostr, right.value_or(CT_QStringLiteral("(nil)")).toStdString());
 }
 
 CT_BOOST_AUTO_TEST_SUITE(GetAuthRequiredResponseTests)
@@ -22,7 +15,7 @@ using namespace QtPiDeck::Network::Obs::Models;
 
 CT_BOOST_AUTO_TEST_CASE(GetAuthRequiredResponseShouldBeParsedFromJson) {
   using namespace QtPiDeck::Utilities::literals;
-  const auto challengeString = "12345"_qs;
+  const auto challengeString = CT_QStringLiteral("12345");
   const auto json = [&challengeString]() {
     QJsonObject obj;
     obj[GetAuthRequiredResponse::authRequiredField] = false;

@@ -1,18 +1,12 @@
-#define BOOST_TEST_MODULE SettingsViewModelTests // NOLINT
 #include "BoostUnitTest.hpp"
 
+#include "QtDefinitions.hpp"
 #include "Utilities/Literals.hpp"
-#include "Utilities/Logging.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
 #include <array>
 
 #include "SignalCatcher.hpp"
-
-auto main(int argc, char* argv[]) -> int {
-  QtPiDeck::Utilities::initLogging("SettingsViewModelTests");
-  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
-}
 
 using namespace QtPiDeck::Tests;
 using namespace QtPiDeck::ViewModels;
@@ -27,17 +21,17 @@ CT_BOOST_AUTO_TEST_SUITE(SettingsViewModelTests)
 
 class TestServerSettingsStorage final : public IServerSettingsStorage {
 public:
-  [[nodiscard]] auto deckServerAddress() const noexcept -> QString final { return "server_address"_qs; }
+  [[nodiscard]] auto deckServerAddress() const noexcept -> QString final { return CT_QStringLiteral("server_address"); }
   void setDeckServerAddress(const QString& deckServerAddress) noexcept final {
     m_deckServerAddress = deckServerAddress;
   }
-  [[nodiscard]] auto deckServerPort() const noexcept -> QString final { return "server_port"_qs; }
+  [[nodiscard]] auto deckServerPort() const noexcept -> QString final { return CT_QStringLiteral("server_port"); }
   void setDeckServerPort(const QString& deckServerPort) noexcept final { m_deckServerPort = deckServerPort; }
-  [[nodiscard]] auto obsWebsocketAddress() const noexcept -> QString final { return "obs_address"_qs; }
+  [[nodiscard]] auto obsWebsocketAddress() const noexcept -> QString final { return CT_QStringLiteral("obs_address"); }
   void setObsWebsocketAddress(const QString& obsWebsocketAddress) noexcept final {
     m_obsWebsocketAddress = obsWebsocketAddress;
   }
-  [[nodiscard]] auto obsWebsocketPort() const noexcept -> QString final { return "obs_port"_qs; }
+  [[nodiscard]] auto obsWebsocketPort() const noexcept -> QString final { return CT_QStringLiteral("obs_port"); }
   void setObsWebsocketPort(const QString& obsWebsocketPort) noexcept final { m_obsWebsocketPort = obsWebsocketPort; }
   [[nodiscard]] auto read(const QString& /*key*/, const QVariant& /*defaultValue*/ = QVariant{}) const noexcept
       -> QVariant final {
@@ -70,7 +64,8 @@ CT_BOOST_AUTO_TEST_CASE(initWithSettingsStorage) {
 CT_BOOST_AUTO_TEST_CASE(saveSettings) {
   auto settingsStorage = std::shared_ptr<IServerSettingsStorage>(new TestServerSettingsStorage());
   SettingsViewModel settingsViewModel{nullptr, settingsStorage};
-  const std::array values{"1.1.1.1"_qs, "2000"_qs, "3.3.3.3"_qs, "4000"_qs};
+  const std::array values{CT_QStringLiteral("1.1.1.1"), CT_QStringLiteral("2000"), CT_QStringLiteral("3.3.3.3"),
+                          CT_QStringLiteral("4000")};
   settingsViewModel.setDeckServerAddress(values[0]);
   settingsViewModel.setDeckServerPort(values[1]);
   settingsViewModel.setObsWebsocketAddress(values[2]);

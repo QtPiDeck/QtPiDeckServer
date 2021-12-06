@@ -1,15 +1,8 @@
-#define BOOST_TEST_MODULE ObsObjectsParsingTests // NOLINT
 #include "BoostUnitTest.hpp"
 
-#include "Network/Obs/ObsObjectsParsing.hpp"
 #include "Network/Obs/Models/ObsResponseStatus.hpp"
+#include "Network/Obs/ObsObjectsParsing.hpp"
 #include "Utilities/Literals.hpp"
-#include "Utilities/Logging.hpp"
-
-auto main(int argc, char* argv[]) -> int {
-  QtPiDeck::Utilities::initLogging("ObsObjectsParsingTests");
-  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
-}
 
 namespace std {
 auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::ostream& {
@@ -17,10 +10,9 @@ auto operator<<(std::ostream& ostr, const std::optional<bool>& right) -> std::os
 }
 }
 
-auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
-  using namespace QtPiDeck::Utilities::literals;
-  return operator<<(ostr, right.value_or("(nil)"_qs).toStdString());
-}
+/*auto operator<<(std::ostream& ostr, const std::optional<QString>& right) -> std::ostream& {
+  return operator<<(ostr, right.value_or(CT_QStringLiteral("(nil)")).toStdString());
+}*/
 
 CT_BOOST_AUTO_TEST_SUITE(ObsObjectsParsingTests)
 
@@ -31,12 +23,12 @@ struct TestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStatus {
 };
 
 CT_BOOST_AUTO_TEST_CASE(objectSpecificFieldShouldBeSkippedIfErrorOccured) {
-  const auto errorStr = "ERROR"_qs;
+  const auto errorStr = CT_QStringLiteral("ERROR");
   const auto valueKey = "val"_qls;
   const auto json = [&]() {
     QJsonObject obj;
     obj[valueKey] = true;
-    obj[TestObject::statusField] = "error"_qs;
+    obj[TestObject::statusField] = CT_QStringLiteral("error");
     obj[TestObject::errorField] = errorStr;
     return QString{QJsonDocument{obj}.toJson()};
   }();
@@ -73,7 +65,7 @@ struct SecondTestObject : public QtPiDeck::Network::Obs::Models::ObsResponseStat
 CT_BOOST_AUTO_TEST_CASE(handleMissingMandatoryField) {
   const auto valueKey = "val"_qls;
   const auto json = [&]() {
-    QJsonObject obj;    
+    QJsonObject obj;
     obj[TestObject::statusField] = TestObject::successStatus;
     return QString{QJsonDocument{obj}.toJson()};
   }();
