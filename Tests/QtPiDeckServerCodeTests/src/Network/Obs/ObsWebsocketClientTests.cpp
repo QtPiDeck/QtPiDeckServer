@@ -118,7 +118,7 @@ public:
     m_message = QLatin1String{m_data};
     return {};
   }
-  void received(QByteArray data) { m_receivedHandler(data); }
+  void received(QByteArray data) { m_receivedHandler(std::move(data)); }
   void connected() { m_handler(); }
   [[nodiscard]] auto message() const -> QLatin1String { return m_message; }
 
@@ -209,7 +209,7 @@ CT_BOOST_AUTO_TEST_CASE(receiveUpdateMessage) {
     return QJsonDocument{obj}.toJson();
   }();
 
-  BOOST_CHECK_THROW(casted->received(json), std::logic_error); // NOLINT
+  CT_BOOST_CHECK_THROW(casted->received(json), std::logic_error);
 }
 
 class FailedWebSocket final : public NoopWebSocket {
