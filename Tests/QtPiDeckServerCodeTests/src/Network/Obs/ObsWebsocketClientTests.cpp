@@ -238,7 +238,7 @@ CT_BOOST_AUTO_TEST_CASE(crashIfUnhandledError) {
   constexpr auto wrongError = static_cast<QtPiDeck::Services::IWebSocket::ConnectionError>(
       static_cast<uint32_t>(QtPiDeck::Services::IWebSocket::ConnectionError::Unspecified) + 1);
 
-  BOOST_CHECK_THROW(std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(wrongError),
+  CT_BOOST_CHECK_THROW(std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(wrongError),
                     std::out_of_range); // NOLINT
 }
 
