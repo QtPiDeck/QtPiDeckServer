@@ -3,24 +3,25 @@
 #include <QCoreApplication>
 #include <QQuickStyle>
 
+#include "Network/Obs/ObsRequests.hpp"
 #include "Services/MessageBus.hpp"
 #include "Services/ObsMessageIdGenerator.hpp"
 #include "Services/SettingsStorage.hpp"
 #include "Services/WebSocketQt.hpp"
-#include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
 #include "ViewModels/SettingsViewModel.hpp"
 
 #include "QtDefinitions.hpp"
 
-static void initStaticResouces() {
+
+void initStaticResouces() {
   Q_INIT_RESOURCE(qml); // NOLINT
 }
 
 namespace QtPiDeck {
-auto ServerApplication::mainPage() -> QUrl {
+auto ServerApplication::mainPage() const -> QUrl {
   using namespace QtPiDeck::Utilities::literals;
-  return "qrc:/qml/pages/main.qml"_qurl;
+  return QUrl{CT_QStringLiteral("qrc:/qml/pages/main.qml")};
 }
 
 void ServerApplication::initialPreparations() {
@@ -56,7 +57,7 @@ void ServerApplication::engineCreated(QQmlApplicationEngine& engine) {
                    m_deckServer.get(), &Network::DeckServer::start);
 
   using namespace QtPiDeck::Utilities::literals;
-  engine.addImportPath("qrc:/qml/components"_qs);
+  engine.addImportPath(CT_QStringLiteral("qrc:/qml/components"));
 
   ViewModels::SettingsViewModel::registerType();
 

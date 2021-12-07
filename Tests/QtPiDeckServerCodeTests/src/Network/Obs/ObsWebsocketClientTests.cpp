@@ -1,17 +1,10 @@
-#define BOOST_TEST_MODULE ObsWebsocketClientTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Network/Obs/ObsWebsocketClient.hpp"
 #include "Utilities/Literals.hpp"
-#include "Utilities/Logging.hpp"
 
 #include <boost/test/data/monomorphic.hpp>
 #include <boost/test/data/test_case.hpp>
-
-auto main(int argc, char* argv[]) -> int {
-  QtPiDeck::Utilities::initLogging("ObsWebsocketClientTests");
-  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
-}
 
 CT_BOOST_AUTO_TEST_SUITE(ObsWebsocketClient)
 
@@ -59,7 +52,8 @@ CT_BOOST_AUTO_TEST_CASE(connectWithoutStorage) {
   client->connectToObs();
   using namespace QtPiDeck::Network::Obs;
   using namespace QtPiDeck::Utilities::literals;
-  CT_BOOST_TEST(std::dynamic_pointer_cast<ConnectableWebSocket>(webSocket)->address() == "ws://localhost:4444"_qs);
+  CT_BOOST_TEST(std::dynamic_pointer_cast<ConnectableWebSocket>(webSocket)->address() ==
+                CT_QStringLiteral("ws://localhost:4444"));
 }
 
 class NoopServerSettingsStorage : public QtPiDeck::Services::IServerSettingsStorage {
@@ -98,7 +92,7 @@ CT_BOOST_AUTO_TEST_CASE(connectWithStorage) {
   using namespace QtPiDeck::Network::Obs;
   using namespace QtPiDeck::Utilities::literals;
   CT_BOOST_TEST(std::dynamic_pointer_cast<ConnectableWebSocket>(webSocket)->address() ==
-                "ws://%1:%2"_qs.arg(ServerSettingsStorage::Address).arg(ServerSettingsStorage::Port));
+                CT_QStringLiteral("ws://%1:%2").arg(ServerSettingsStorage::Address).arg(ServerSettingsStorage::Port));
 }
 
 class SimpleMessageBus final : public NoopMessageBus {
@@ -124,7 +118,7 @@ public:
     m_message = QLatin1String{m_data};
     return {};
   }
-  void received(QByteArray data) { m_receivedHandler(data); }
+  void received(QByteArray data) { m_receivedHandler(std::move(data)); }
   void connected() { m_handler(); }
   [[nodiscard]] auto message() const -> QLatin1String { return m_message; }
 
@@ -185,8 +179,8 @@ CT_BOOST_AUTO_TEST_CASE(askAuthAfterConnectUnsuccessfulResponse) {
   const auto json = [&]() {
     using namespace QtPiDeck::Network::Obs::Models;
     QJsonObject obj;
-    obj[GetAuthRequiredResponse::statusField] = "error"_qs;
-    obj[GetAuthRequiredResponse::errorField] = "Some error"_qs;
+    obj[GetAuthRequiredResponse::statusField] = CT_QStringLiteral("error");
+    obj[GetAuthRequiredResponse::errorField] = CT_QStringLiteral("Some error");
     return QJsonDocument{obj}.toJson();
   }();
 
@@ -211,11 +205,11 @@ CT_BOOST_AUTO_TEST_CASE(receiveUpdateMessage) {
     using namespace QtPiDeck::Network::Obs::Models;
     QJsonObject obj;
     obj[GetAuthRequiredResponse::statusField] = GetAuthRequiredResponse::successStatus;
-    obj["update-type"_qls] = "Random"_qs;
+    obj["update-type"_qls] = CT_QStringLiteral("Random");
     return QJsonDocument{obj}.toJson();
   }();
 
-  BOOST_CHECK_THROW(casted->received(json), std::logic_error); // NOLINT
+  CT_BOOST_CHECK_THROW(casted->received(json), std::logic_error);
 }
 
 class FailedWebSocket final : public NoopWebSocket {
@@ -244,7 +238,7 @@ CT_BOOST_AUTO_TEST_CASE(crashIfUnhandledError) {
   constexpr auto wrongError = static_cast<QtPiDeck::Services::IWebSocket::ConnectionError>(
       static_cast<uint32_t>(QtPiDeck::Services::IWebSocket::ConnectionError::Unspecified) + 1);
 
-  BOOST_CHECK_THROW(std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(wrongError),
+  CT_BOOST_CHECK_THROW(std::static_pointer_cast<FailedWebSocket>(webSocket)->emitError(wrongError),
                     std::out_of_range); // NOLINT
 }
 

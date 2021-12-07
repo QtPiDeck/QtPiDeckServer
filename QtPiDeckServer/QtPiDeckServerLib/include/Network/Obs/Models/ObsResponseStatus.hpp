@@ -6,6 +6,7 @@
 
 #include "Network/Obs/ObsRequests.hpp"
 #include "Utilities/Literals.hpp"
+#include "QtDefinitions.hpp"
 
 namespace QtPiDeck::Network::Obs::Models {
 using namespace QtPiDeck::Utilities::literals;
@@ -19,7 +20,7 @@ struct ObsResponseStatus {
     static const inline QLatin1String statusField = "status"_qls;
     static const inline QLatin1String errorField = "error"_qls;
 
-    static const inline QString successStatus = "ok"_qs;
+    static const inline QString successStatus = CT_QStringLiteral("ok");
 };
 
 inline auto isRequestSuccessful(const ObsResponseStatus& responseStatus) noexcept -> bool {

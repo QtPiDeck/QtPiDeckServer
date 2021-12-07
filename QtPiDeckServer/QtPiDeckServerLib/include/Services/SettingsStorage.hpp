@@ -4,6 +4,7 @@
 
 #include <QSettings>
 
+#include "QtDefinitions.hpp"
 #include "QtPiDeckServerDefinitions.hpp"
 #include "Services/IServerSettingsStorage.hpp"
 #include "Utilities/Literals.hpp"
@@ -46,9 +47,11 @@ public:
 private:
   std::unique_ptr<QSettings> m_settings;
 
-  inline static const FieldData DeckServerAddress{"DeckServerAddress"_qs, "127.0.0.1"_qs};
-  inline static const FieldData DeckServerPort{"DeckServerPort"_qs, "13000"_qs};
-  inline static const FieldData ObsWebsocketAddress{"ObsWebsocketAddress"_qs, "127.0.0.1"_qs};
-  inline static const FieldData ObsWebsocketPort{"ObsWebsocketPort"_qs, "4444"_qs};
+  inline static const FieldData DeckServerAddress{CT_QStringLiteral("DeckServerAddress"),
+                                                  CT_QStringLiteral("127.0.0.1")};
+  inline static const FieldData DeckServerPort{CT_QStringLiteral("DeckServerPort"), CT_QStringLiteral("13000")};
+  inline static const FieldData ObsWebsocketAddress{CT_QStringLiteral("ObsWebsocketAddress"),
+                                                    CT_QStringLiteral("127.0.0.1")};
+  inline static const FieldData ObsWebsocketPort{CT_QStringLiteral("ObsWebsocketPort"), CT_QStringLiteral("4444")};
 };
 }
