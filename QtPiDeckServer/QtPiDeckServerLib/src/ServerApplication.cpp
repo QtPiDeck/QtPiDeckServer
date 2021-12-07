@@ -13,10 +13,9 @@
 
 #include "QtDefinitions.hpp"
 
-namespace {
+
 void initStaticResouces() {
   Q_INIT_RESOURCE(qml); // NOLINT
-}
 }
 
 namespace QtPiDeck {
