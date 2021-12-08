@@ -1,6 +1,6 @@
 #include "DeckServer.hpp"
 
-#include "Network/DeckDataStream.hpp"
+#include "Utilities/MessageUtils.hpp"
 
 namespace QtPiDeck::Network::detail {
 
@@ -52,41 +52,21 @@ void DeckServerPrivate<Derived, TcpServer, TcpSocket>::handleConnection() noexce
   connect(m_socket, &TcpSocket::readyRead, this, &DeckServerPrivate::readData);
 }
 
-template<class T, class Socket>
-void writeObject(const T& object, Socket* socket) {
-  QByteArray tmp;
-  tmp.reserve(sizeof(T));
-  DeckDataStream outStream{&tmp, QIODevice::WriteOnly};
-  outStream << object;
-  socket->write(tmp);
-}
-
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::sendPong(const Bus::Message& message) {
-  const auto requestId = [&message]() noexcept {
-    QString value;
-    QDataStream qds{message.payload};
-    qds >> value;
-    return value;
-  }();
+  const auto requestId = Bus::convertPayload<QString>(message);
   BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Sending pong" << requestId.toStdString();
-  writeObject(getEmptyMessageHeader(MessageType::Pong, requestId), m_socket);
+  Utilities::sendHeader(getEmptyMessageHeader(MessageType::Pong, requestId), *m_socket);
   m_socket->flush();
 }
 
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::processMessage(
     const QtPiDeck::Network::MessageHeader& header) noexcept {
-  auto sendMessage = [this](DeckMessages messageType, const QString& requestId) {
-    QByteArray payload;
-    QDataStream qds{&payload, QIODevice::WriteOnly};
-    qds << requestId;
-    service<Services::IMessageBus>()->sendMessage(Bus::Message{messageType, payload});
-  };
-  switch (header.messageType) {
+  switch (auto messageBus = service<Services::IMessageBus>(); header.messageType) {
   case QtPiDeck::Network::MessageType::Ping:
     BOOST_LOG_SEV(m_slg, Utilities::severity::debug) << "Got ping" << header.requestId.toStdString();
-    sendMessage(DeckMessages::PingReceived, header.requestId);
+    messageBus->sendMessage(Bus::createMessage(DeckMessages::PingReceived, header.requestId));
     break;
   default:
     BOOST_LOG_SEV(m_slg, Utilities::severity::warning) << "Unhandled message";
@@ -106,6 +86,7 @@ auto readObject(TSocket* socket) -> std::optional<T> {
 
   return std::nullopt;
 }
+
 template<class Derived, class TcpServer, class TcpSocket>
 void DeckServerPrivate<Derived, TcpServer, TcpSocket>::readData() {
   if (const auto header = readObject<QtPiDeck::Network::MessageHeader>(m_socket); header.has_value()) {
