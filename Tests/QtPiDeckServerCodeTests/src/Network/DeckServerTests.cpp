@@ -1,14 +1,8 @@
-#define BOOST_TEST_MODULE DeckServerTests // NOLINT
 #include "BoostUnitTest.hpp"
 
 #include "Network/DeckServer.inl"
 #include "Utilities/Literals.hpp"
 #include "Utilities/Logging.hpp"
-
-auto main(int argc, char* argv[]) -> int {
-  QtPiDeck::Utilities::initLogging("DeckServerTests");
-  return boost::unit_test::unit_test_main(&init_unit_test, argc, argv);
-}
 
 using QtPiDeck::Bus::Message;
 using QtPiDeck::Network::DeckMessages;
@@ -130,7 +124,7 @@ protected:
 };
 }
 
-CT_BOOST_AUTO_TEST_SUITE(DeckServer)
+CT_BOOST_AUTO_TEST_SUITE(DeckServerTests)
 
 CT_BOOST_AUTO_TEST_CASE(constructorShouldSetServices) {
   auto messageBus = std::make_shared<EmptyIMessageBusImpl>();
