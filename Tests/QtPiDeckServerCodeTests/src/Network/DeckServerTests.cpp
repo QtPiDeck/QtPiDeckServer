@@ -111,15 +111,15 @@ struct Fixture {
   Fixture() : m_messageBus(TrackableMessageBus ::create()) {}
   auto messageBus() -> std::shared_ptr<TrackableMessageBus>& { return m_messageBus; }
 
-protected:
+private:
   std::shared_ptr<TrackableMessageBus> m_messageBus;
 };
 
 struct FixtureSuccess : Fixture {
-  FixtureSuccess() : m_server(nullptr, m_messageBus) { m_server.start(); }
+  FixtureSuccess() : m_server(nullptr, messageBus()) { m_server.start(); }
   auto server() -> DeckServerImplSuccess& { return m_server; }
 
-protected:
+private:
   DeckServerImplSuccess m_server;
 };
 }
