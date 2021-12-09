@@ -422,3 +422,10 @@ jobs:
         with:
           files: coverage/coverage.txt
           fail_ci_if_error: true
+
+  done:
+    if: github.event_name == 'pull_request'
+    needs: [clang-tidy, code-coverage, win-mac-test]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "DONE"
