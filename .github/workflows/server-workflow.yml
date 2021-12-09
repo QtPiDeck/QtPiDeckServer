@@ -318,3 +318,107 @@ jobs:
         with:
           script: |
             core.setFailed('clang-tidy detected errors. Check job artifacts')
+
+  code-coverage:
+    needs: [code-checks-generator, ubuntu-test]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
+    env:
+      clang: "clang-12"
+      clangpp: "clang++-12"
+      triplet: "x64-linux"
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ubuntu-QtCache-${{ matrix.qt }}
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          aqtversion: ==2.0.0
+          modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
+          version: '${{ matrix.qt }}'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+
+      - name: Set outputs
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ubuntu-latest)"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ubuntu-latest)."
+        id: set-outputs
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
+          vcpkgTriplet: ${{ env.triplet }}
+          vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+        
+      - name: Install additional Qt6 dependencies
+        run: |
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-${VULKAN_VER}-focal.list https://packages.lunarg.com/vulkan/${VULKAN_VER}/lunarg-vulkan-${VULKAN_VER}-focal.list
+          sudo apt update
+          sudo apt install
+          sudo apt install vulkan-sdk libxkbcommon-dev -y
+        if: matrix.cfg.qt == env.QT6
+
+      - name: Install llvm
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 12
+          sudo apt-get install -y llvm-12 binutils-gold
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Create build directory
+        run: cmake -E make_directory "build"
+
+      - name: Run cmake
+        run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_COMMON_TESTS=OFF
+        env:
+          CC: ${{ env.clang }}
+          CXX: ${{ env.clangpp }}
+
+      - run: cmake --build build
+
+      - run: mkdir coverage
+
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LLVM_PROFILE_FILE: ${{ github.workspace }}/coverage/%p.profraw
+
+      - run: ls coverage -lh
+
+      - run: llvm-profdata-12 merge *.profraw -o coverage.profdata # -sparse
+        working-directory: coverage
+
+      - run: find ${{ github.workspace }}/build/Tests/ -type f -executable
+
+      - name: Prepare report
+        run: |
+          llvm-cov-12 show \
+          $(find ${{ github.workspace }}/build/ -type f \( -executable -and -name '*Tests' \) -or -name '*.o' | sed ':a; N; $!ba; s/\n/ -object /g') \
+          -ignore-filename-regex="$(find ../QtPiDeckServer/ \( -name '*.cpp' -or -name '*.hpp' -or -name '*.inl' \) -exec awk '/NOCOVERAGE/ {print FILENAME} {nextfile;}' {} + | sed 's|^.*QtPiDeckServer/||;s/\./\\./' | sed ':a; N; $!ba; s/\n/|/g')" \
+          -instr-profile=coverage.profdata --show-branches=count -show-line-counts -ignore-filename-regex='Tests' > coverage.txt
+        working-directory: coverage
+
+      - uses: codecov/codecov-action@v2
+        with:
+          files: coverage/coverage.txt
+          fail_ci_if_error: true
