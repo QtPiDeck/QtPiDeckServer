@@ -5,34 +5,52 @@
 #include <QObject>
 #include <QTcpServer>
 
-#include "Application.hpp"
+#include <boost/log/attributes/constant.hpp>
+#include <boost/log/trivial.hpp>
+
+#include "Services/UseServices.hpp"
 #include "Network/MessageHeader.hpp"
 #include "Services/IMessageBus.hpp"
+#include "Utilities/Logging.hpp"
 
 namespace QtPiDeck::Network {
 
 enum DeckMessages : uint64_t { PingReceived = 0x100 };
 
-class DeckServer : public QObject, public Services::UseServices<Services::IMessageBus> {
-  Q_OBJECT // NOLINT
+namespace detail {
+template<class Derived, class TcpServer = QTcpServer, class TcpSocket = QTcpSocket>
+class DeckServerPrivate : public QObject, public Services::UseServices<Services::IMessageBus> {
 public:
-  explicit DeckServer(QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus);
+  DeckServerPrivate(QObject* parent, std::shared_ptr<Services::IMessageBus> messageBus) noexcept;
+  void start() noexcept;
 
-  void start();
+  [[nodiscard]] auto currentConnection() -> TcpSocket* { return m_socket; }
+  [[nodiscard]] auto currentConnection() const -> const TcpSocket* { return m_socket; }
 
-public slots: // NOLINT(readability-redundant-access-specifiers)
-  void handleConnection();
-  void readData();
+protected:
+  [[nodiscard]] auto server() -> TcpServer& { return m_server; }
+  [[nodiscard]] auto server() const -> const TcpServer& { return m_server; }
 
 private:
-  void connectToServerSignal();
-  void sendPong(const Bus::Message&);
+  void connectToNewConnectionServerSignal();
+  void handleConnection() noexcept;
+  void subscribeToUtilityMessages();
+  void sendPong(const Bus::Message& message);
   void processMessage(const QtPiDeck::Network::MessageHeader& header) noexcept;
+  void readData();
 
-  QTcpServer m_server;
-  QTcpSocket* m_socket{};
-  std::optional<QMetaObject::Connection> m_serverConnection;
+  Utilities::Connection m_pingConnection{};
+  std::optional<QMetaObject::Connection> m_serverConnection{};
+  TcpServer m_server{};
+  TcpSocket* m_socket{};
 
-  Utilities::Connection m_sub;
+  mutable boost::log::sources::severity_logger<boost::log::trivial::severity_level> m_slg;
+};
+}
+
+class DeckServer : public detail::DeckServerPrivate<DeckServer> {
+  Q_OBJECT // NOLINT
+  friend detail::DeckServerPrivate<DeckServer>;
+  using DeckServerPrivate<DeckServer>::DeckServerPrivate;
 };
 }
