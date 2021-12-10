@@ -8,24 +8,113 @@ on:
 
 env:
   QT5: 5.15.2
-  QT6: 6.2.0
+  QT6: 6.2.1
   VULKAN_VER: 1.2.189
   VULKAN_VER_FULL: 1.2.189.0
 
 jobs:
-  generator:
+  ubuntu-jobs-generator:
     runs-on: ubuntu-latest
     outputs:
       job-matrix: ${{ steps.set-matrix.outputs.job-matrix }}
     steps:
       - id: set-matrix
-        run: echo "::set-output name=job-matrix::{\"os\":[\"ubuntu\",\"windows\",\"macos\"],\"qt\":[\"${{ env.QT5 }}\",\"${{ env.QT6 }}\"]}"
+        run: echo "::set-output name=job-matrix::{\"os\":[\"ubuntu\"],\"qt\":[\"${{ env.QT5 }}\",\"${{ env.QT6 }}\"]}"
 
-  test:
-    needs: [generator]
+  win-mac-generator:
+    runs-on: ubuntu-latest
+    outputs:
+      job-matrix: ${{ steps.set-matrix.outputs.job-matrix }}
+    steps:
+      - id: set-matrix
+        run: echo "::set-output name=job-matrix::{\"os\":[\"windows\",\"macos\"],\"qt\":[\"${{ env.QT5 }}\",\"${{ env.QT6 }}\"]}"
+
+  ubuntu-test:
+    needs: [ubuntu-jobs-generator]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJSON(needs.ubuntu-jobs-generator.outputs.job-matrix)}}
+    steps:
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ matrix.os }}-QtCache-${{ matrix.qt }}
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          aqtversion: ==2.0.0
+          modules: ${{ matrix.qt == env.QT6 && 'qtwebsockets' || '' }}
+          version: '${{ matrix.qt }}'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          submodules: 'recursive'
+
+      - name: Set outputs
+        run: |
+          echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ${{ matrix.os }}-latest)"
+          echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ${{ matrix.os }}-latest)."
+          echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ${{ matrix.os }})"
+          echo "::set-output name=cc::$(python3 ${{ github.workspace }}/scripts/cc.py ${{ matrix.os }})"
+          echo "::set-output name=cxx::$(python3 ${{ github.workspace }}/scripts/cxx.py ${{ matrix.os }})"
+        id: set-outputs
+        env:
+          PYTHONPATH: ./QtPiDeckCommon/scripts/
+
+      - name: Check outputs
+        run: |
+          echo "dependencies=${{ steps.set-outputs.outputs.dependencies }}"
+          echo "cacheKey=${{ steps.set-outputs.outputs.cacheKey }}"
+          echo "triplet=${{ steps.set-outputs.outputs.triplet }}"
+          echo "cc=${{ steps.set-outputs.outputs.cc }}"
+          echo "cxx=${{ steps.set-outputs.outputs.cxx }}"
+
+      - uses: lukka/run-vcpkg@v7.3
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
+          appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
+          vcpkgTriplet: ${{ steps.set-outputs.outputs.triplet }}
+          vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
+          doNotUpdateVcpkg: true
+        if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+
+      - name: Install additional Qt6 dependencies
+        run: |
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-${VULKAN_VER}-focal.list https://packages.lunarg.com/vulkan/${VULKAN_VER}/lunarg-vulkan-${VULKAN_VER}-focal.list
+          sudo apt update
+          sudo apt install
+          sudo apt install vulkan-sdk libxkbcommon-dev -y
+        if: matrix.os == 'ubuntu' && matrix.qt == env.QT6
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Create build directory
+        run: cmake -E make_directory "build"
+
+      - run: cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake
+        env:
+          CC: ${{ steps.set-outputs.outputs.cc }}
+          CXX: ${{ steps.set-outputs.outputs.cxx }}
+
+      - run: cmake --build build
+
+      - name: Test project
+        run: ctest --output-on-failure
+        working-directory: build
+        env:
+          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
+
+  win-mac-test:
+    needs: [win-mac-generator]
     runs-on: ${{ format('{0}-latest', matrix.os) }}
     strategy:
-      matrix: ${{fromJSON(needs.generator.outputs.job-matrix)}}
+      matrix: ${{fromJSON(needs.win-mac-generator.outputs.job-matrix)}}
     steps:
       - name: Cache Qt
         id: cache-qt
@@ -80,15 +169,6 @@ jobs:
           brew update
           brew upgrade llvm
         if: matrix.os == 'macos'
-
-      - name: Install additional Qt6 dependencies
-        run: |
-          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-${VULKAN_VER}-focal.list https://packages.lunarg.com/vulkan/${VULKAN_VER}/lunarg-vulkan-${VULKAN_VER}-focal.list
-          sudo apt update
-          sudo apt install
-          sudo apt install vulkan-sdk libxkbcommon-dev -y
-        if: matrix.os == 'ubuntu' && matrix.qt == env.QT6
 
       - name: Cache Vulkan
         id: cache-vulkan
@@ -145,7 +225,7 @@ jobs:
 
   clang-tidy:
     if: github.event_name == 'pull_request'
-    needs: [code-checks-generator, test]
+    needs: [code-checks-generator, ubuntu-test]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
@@ -240,10 +320,14 @@ jobs:
             core.setFailed('clang-tidy detected errors. Check job artifacts')
 
   code-coverage:
-    needs: [code-checks-generator, test]
+    needs: [code-checks-generator, ubuntu-test]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.code-checks-generator.outputs.job-matrix)}}
+    env:
+      clang: "clang-12"
+      clangpp: "clang++-12"
+      triplet: "x64-linux"
     steps:
       - name: Cache Qt
         id: cache-qt
@@ -269,27 +353,34 @@ jobs:
         run: |
           echo "::set-output name=dependencies::$(python3 ${{ github.workspace }}/scripts/vcpkgPackages.py qt${{ matrix.qt }} ubuntu-latest)"
           echo "::set-output name=cacheKey::$(python3 ${{ github.workspace }}/scripts/vcpkgCacheKey.py qt${{ matrix.qt }} ubuntu-latest)."
-          echo "::set-output name=triplet::x64-$(python3 ${{ github.workspace }}/scripts/triplet.py ubuntu)"
         id: set-outputs
         env:
           PYTHONPATH: ./QtPiDeckCommon/scripts/
-
-      - name: Check outputs
-        run: |
-          echo "dependencies=${{ steps.set-outputs.outputs.dependencies }}"
-          echo "cacheKey=${{ steps.set-outputs.outputs.cacheKey }}"
-          echo "triplet=${{ steps.set-outputs.outputs.triplet }}"
-          echo "cc=${{ steps.set-outputs.outputs.cc }}"
-          echo "cxx=${{ steps.set-outputs.outputs.cxx }}"
 
       - uses: lukka/run-vcpkg@v7.3
         with:
           vcpkgDirectory: ${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg
           appendedCacheKey: ${{ steps.set-outputs.outputs.cacheKey }}
-          vcpkgTriplet: ${{ steps.set-outputs.outputs.triplet }}
+          vcpkgTriplet: ${{ env.triplet }}
           vcpkgArguments: ${{ steps.set-outputs.outputs.dependencies }}
           doNotUpdateVcpkg: true
         if: steps.vcpkgPackages.outputs.dependencies != 'nil'
+        
+      - name: Install additional Qt6 dependencies
+        run: |
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-${VULKAN_VER}-focal.list https://packages.lunarg.com/vulkan/${VULKAN_VER}/lunarg-vulkan-${VULKAN_VER}-focal.list
+          sudo apt update
+          sudo apt install
+          sudo apt install vulkan-sdk libxkbcommon-dev -y
+        if: matrix.cfg.qt == env.QT6
+
+      - name: Install llvm
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 12
+          sudo apt-get install -y llvm-12 binutils-gold
 
       - uses: lukka/get-cmake@latest
 
@@ -297,44 +388,44 @@ jobs:
         run: cmake -E make_directory "build"
 
       - name: Run cmake
-        run:  cmake -S . -B build -G Ninja -DBUILD_COMMON_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S . -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/QtPiDeckCommon/ext/vcpkg/scripts/buildsystems/vcpkg.cmake -DCODECOV=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_COMMON_TESTS=OFF
         env:
-          CC: gcc-10
-          CXX: g++-10
+          CC: ${{ env.clang }}
+          CXX: ${{ env.clangpp }}
 
       - run: cmake --build build
 
-      - name: Install lcov
-        run: sudo apt update && sudo apt install -y lcov
-
-      - name: Initial lcov run
-        run: lcov --rc lcov_branch_coverage=1 --no-external --capture --initial --directory . --output-file before.txt --gcov-tool gcov-10
+      - run: mkdir coverage
 
       - name: Test project
         run: ctest --output-on-failure
         working-directory: build
         env:
-          LD_LIBRARY_PATH: ./QtPiDeckCommon/QtPiDeckCommon
+          LLVM_PROFILE_FILE: ${{ github.workspace }}/coverage/%p.profraw
 
-      - name: Post-test lcov run
-        run: lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.txt --gcov-tool gcov-10
+      - run: ls coverage -lh
 
-      - name: Merge lcov reports
+      - run: llvm-profdata-12 merge *.profraw -o coverage.profdata # -sparse
+        working-directory: coverage
+
+      - run: find ${{ github.workspace }}/build/Tests/ -type f -executable
+
+      - name: Prepare report
         run: |
-            lcov --rc lcov_branch_coverage=1 --add-tracefile before.txt --add-tracefile coverage.txt --output-file coverage.txt --gcov-tool gcov-10
-            rm before.txt
-
-      - name: Clean up report
-        run: lcov --rc lcov_branch_coverage=1 --remove coverage.txt -o coverage.txt '/usr/*' '*Tests/*' '*build/*' '*boost*' '*QtPiDeckCommon*' --gcov-tool gcov-10
+          llvm-cov-12 show \
+          $(find ${{ github.workspace }}/build/ -type f \( -executable -and -name '*Tests' \) -or -name '*.o' | sed ':a; N; $!ba; s/\n/ -object /g') \
+          -ignore-filename-regex="$(find ../QtPiDeckServer/ \( -name '*.cpp' -or -name '*.hpp' -or -name '*.inl' \) -exec awk '/NOCOVERAGE/ {print FILENAME} {nextfile;}' {} + | sed 's|^.*QtPiDeckServer/||;s/\./\\./' | sed ':a; N; $!ba; s/\n/|/g')" \
+          -instr-profile=coverage.profdata --show-branches=count -show-line-counts -ignore-filename-regex='Tests' > coverage.txt
+        working-directory: coverage
 
       - uses: codecov/codecov-action@v2
         with:
-          files: coverage.txt
+          files: coverage/coverage.txt
           fail_ci_if_error: true
 
   done:
     if: github.event_name == 'pull_request'
-    needs: [clang-tidy, code-coverage]
+    needs: [clang-tidy, code-coverage, win-mac-test]
     runs-on: ubuntu-latest
     steps:
       - run: echo "DONE"
